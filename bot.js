@@ -8,6 +8,7 @@ const { Bot, session, MemorySessionStorage, Keyboard, InlineKeyboard, InputFile,
 require('dotenv').config()
 const Database = require("./db");
 const customLogger = require("./config/customLogger");
+const { FileFlavor, hydrateFiles } = require("@grammyjs/files")
 // const { check_user,register_user, remove_user, set_user_lang } = require("./controllers/userController");
 
 // modules
@@ -29,6 +30,7 @@ const bot = new Bot(bot_token);
 
 
 bot.use(config_bot)
+bot.api.config.use(hydrateFiles(bot.token));
 bot.filter(async (ctx)=> ctx.config.super_admin).use(admin_bot)
 bot.filter(async (ctx)=> !ctx.config.super_admin).use(client_bot)
 

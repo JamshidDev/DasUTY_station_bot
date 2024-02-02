@@ -1,11 +1,11 @@
-const { Composer } = require("grammy");
-const { Menu, MenuRange } = require("@grammyjs/menu");
-const { I18n, hears } = require("@grammyjs/i18n");
+const {Composer, Keyboard} = require("grammy");
+const {Menu, MenuRange} = require("@grammyjs/menu");
+const {I18n, hears} = require("@grammyjs/i18n");
 const {
     conversations,
     createConversation,
 } = require("@grammyjs/conversations");
-const { check_user, register_user, remove_user, set_user_lang } = require("../controllers/userController");
+const {check_user, register_user, remove_user, set_user_lang} = require("../controllers/userController");
 
 const bot = new Composer();
 const i18n = new I18n({
@@ -13,119 +13,59 @@ const i18n = new I18n({
     useSession: true,
     directory: "locales",
     globalTranslationContext(ctx) {
-        return { first_name: ctx.from?.first_name ?? "" };
+        return {first_name: ctx.from?.first_name ?? ""};
     },
 });
 bot.use(i18n);
-
+bot.use(createConversation(register_user_phone));
 const pm = bot.chatType("private")
 
 
-const language_menu = new Menu("language_menu")
-    .dynamic(async (ctx, range) => {
-        let list = [{
-            name: "language_uz",
-            key: "uz"
-        },
-        {
-            name: "language_ru",
-            key: "ru"
-        }
-        ]
-        list.forEach((item) => {
-            range
-                .text(ctx.t(item.name), async (ctx) => {
-                    await ctx.answerCallbackQuery();
-                    await ctx.i18n.setLocale(item.key);
-                    data = {
-                        user_id: ctx.from.id,
-                        lang: item.key
-                    }
-                    await set_user_lang(data);
-                    await ctx.deleteMessage();
+async function register_user_phone(conversation, ctx) {
 
-                })
-                .row();
-        })
+    let phone_btn = new Keyboard()
+        .requestContact("📞 Telefon raqam")
+        .resized();
+    await ctx.reply(`
+<b>Salom 👋. DASUTY botga xush kelibsiz.</b>
+Ro'yhatdan o'tish uchun telefon raqamingizni yuboring!
+
+<i>👇Telefon raqam tugmasini bosing.</i> 
+   `, {
+        parse_mode: "HTML",
+        reply_markup: phone_btn
     })
-pm.use(language_menu)
+
+    ctx = await conversation.wait();
+    if (check_phone_number(ctx.message, conversation)) {
+        do {
+            await ctx.reply(ctx.t("invalid_phone_text"), {
+                parse_mode: "HTML",
+            });
+            ctx = await conversation.wait();
+        } while (check_phone_number(ctx.message, conversation));
+    }
+    await ctx.reply("Tekshirilmoqda...")
+
+}
+
+
+const check_phone_number = (msg, conversation) => {
+    if (msg?.contact) {
+        conversation.session.session_db.client.phone = msg.contact.phone_number
+        return false
+    } else {
+        let reg = new RegExp('^[012345789][0-9]{8}$');
+        conversation.session.session_db.client.phone = reg.test(msg.text) ? "+998" + msg.text : null;
+        return !reg.test(msg.text)
+    }
+
+}
 
 
 pm.command("start", async (ctx) => {
-    let lang = await ctx.i18n.getLocale();
-    if (!i18n.locales.includes(lang)) {
-        await ctx.i18n.setLocale("uz");
-    }
-    let user = await check_user(ctx.from.id);
-    data = {
-        user_id: ctx.from.id,
-        full_name: ctx.from.first_name,
-        username: ctx.from.username || null,
-        active: true
-    }
-    if (user) {
-        await ctx.i18n.setLocale(user.lang);
-        data.lang = user.lang;
-        await register_user(data);
-    } else {
-        lang = await ctx.i18n.getLocale()
-        data.lang = lang;
-        await register_user(data);
-    }
-    await ctx.reply(ctx.t("start_hello_msg", {
-        full_name: ctx.from.first_name,
-        organization_name: "Fashion Market"
-    }), {
-        parse_mode: "HTML",
-        reply_markup: language_menu
-    })
+    await ctx.conversation.enter("register_user_phone");
 })
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-module.exports =  bot
+module.exports = bot
