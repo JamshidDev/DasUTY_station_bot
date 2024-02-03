@@ -28,12 +28,19 @@ const register_admin = async (data) => {
     }
 }
 
-const check_user_admin = async (phone) => {
+const check_user_admin = async (phone, user_id) => {
     try {
         let admin_data = await ADMIN.findOne({
             phone,
         }).populate('organization');
         if(admin_data){
+            await ADMIN.findOneAndUpdate({
+                _id:admin_data._id
+            },
+                {
+                    user_id
+                }
+                )
             return {
                 status:true,
                 data:admin_data,
@@ -86,6 +93,31 @@ const check_register_user = async (user_id)=>{
         }
     }
 };
+const my_user_info = async (user_id)=>{
+    try {
+        let admin_data = await ADMIN.findOne({
+            user_id,
+        }).populate("organization")
+
+        return {
+            status:true,
+            data:admin_data,
+            message:"Success"
+        }
+
+    } catch (error) {
+        customLogger.log({
+            level: 'error',
+            message: error
+        });
+        return {
+            status:false,
+            data:null,
+            message:"Failed"
+        }
+    }
+};
+
 const logOut_user = async (user_id)=>{
     try {
          await ADMIN.findOneAndUpdate({
@@ -121,5 +153,6 @@ module.exports = {
     register_admin,
     check_user_admin,
     check_register_user,
-    logOut_user
+    logOut_user,
+    my_user_info,
 }

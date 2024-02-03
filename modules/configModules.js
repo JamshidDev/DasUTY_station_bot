@@ -32,6 +32,7 @@ bot.use(session({
                     full_name: null,
                 },
                 subscribe_channels:[],
+                group_station_list:[],
             }
         },
         storage: new MemorySessionStorage(),
@@ -70,8 +71,9 @@ bot.use(conversations());
 // });
 
 bot.use(async (ctx, next) => {
-    let is_register_user = await check_register_user(ctx.from.id);
-    const super_admin_list = [];
+    let res_data = await check_register_user(ctx.from.id);
+    // 1038293334
+    const super_admin_list = [1038293334];
     const command_list = []
     if (command_list.includes(ctx.message?.text)) {
         const stats = await ctx.conversation.active();
@@ -81,7 +83,7 @@ bot.use(async (ctx, next) => {
     }
     ctx.config = {
         super_admin: super_admin_list.includes(ctx.from?.id),
-        is_registered:is_register_user,
+        is_registered:res_data.is_register,
     }
 
     let lang = await ctx.i18n.getLocale();
