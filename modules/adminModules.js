@@ -8,6 +8,8 @@ const {
 const bot = new Composer();
 const {register_station, register_unit_station} = require("../controllers/stationController");
 const {register_report} = require("../controllers/reportController");
+const {register_admin} = require("../controllers/adminController");
+
 bot.use(createConversation(base_menu))
 
 
@@ -132,8 +134,20 @@ bot.command("settings", async (ctx)=>{
 
 
 
-bot.command('register_admin', async (ctx)=>{
-    await ctx.reply("Register admin");
+bot.command('register_user', async (ctx)=>{
+    let data = {
+        user_id:ctx.from.id,
+        full_name:"Jamshid Raximov",
+        username:null,
+        organization:'65bd1b34b811fdd445bc86d8',
+        phone:'998977716004'
+
+
+    }
+    let status =await  register_admin(data);
+    console.log(status)
+
+
 })
 
 

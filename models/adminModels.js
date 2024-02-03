@@ -4,8 +4,8 @@ const mongoose = require('mongoose')
 const adminSchema = mongoose.Schema({
     user_id: {
         type: Number,
-        required: true,
         unique: true,
+        default: null,
     },
     full_name: {
         type: String,

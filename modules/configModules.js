@@ -6,6 +6,7 @@ const {
     conversations,
 } = require("@grammyjs/conversations");
 const { check_user, register_user, remove_user, set_user_lang } = require("../controllers/userController");
+const {check_register_user} = require("../controllers/adminController")
 const channelController = require("../controllers/channelController")
 const adapter = new MemorySessionStorage();
 
@@ -42,34 +43,35 @@ bot.use(session({
 bot.use(chatMembers(adapter));
 bot.use(conversations());
 
-bot.on("my_chat_member", async (ctx) => {
-    const status = ctx.update.my_chat_member.new_chat_member.status
-    if (status === "kicked") {
-        const stats = await ctx.conversation.active();
-        for (let key of Object.keys(stats)) {
-            await ctx.conversation.exit(key);
-        }
-        await remove_user(ctx.from.id)
-    }else if(status === "administrator"){
-        let data = {
-            telegram_id: ctx.update.my_chat_member.chat.id,
-            user_id: ctx.update.my_chat_member.from.id,
-            title: ctx.update.my_chat_member.chat.title,
-            username: ctx.update.my_chat_member.chat.username,
-            type: ctx.update.my_chat_member.chat.type,
-            new_chat: ctx.update.my_chat_member.new_chat_member, // object
-        }
-        channelController.store_item(data)
-    }else if(status === "left" || status=== "member"){
-        let telegram_id = ctx.update.my_chat_member.chat.id;
-        channelController.remove_item(telegram_id)
-
-    }
-
-});
+// bot.on("my_chat_member", async (ctx) => {
+//     const status = ctx.update.my_chat_member.new_chat_member.status
+//     if (status === "kicked") {
+//         const stats = await ctx.conversation.active();
+//         for (let key of Object.keys(stats)) {
+//             await ctx.conversation.exit(key);
+//         }
+//         await remove_user(ctx.from.id)
+//     }else if(status === "administrator"){
+//         let data = {
+//             telegram_id: ctx.update.my_chat_member.chat.id,
+//             user_id: ctx.update.my_chat_member.from.id,
+//             title: ctx.update.my_chat_member.chat.title,
+//             username: ctx.update.my_chat_member.chat.username,
+//             type: ctx.update.my_chat_member.chat.type,
+//             new_chat: ctx.update.my_chat_member.new_chat_member, // object
+//         }
+//         channelController.store_item(data)
+//     }else if(status === "left" || status=== "member"){
+//         let telegram_id = ctx.update.my_chat_member.chat.id;
+//         channelController.remove_item(telegram_id)
+//
+//     }
+//
+// });
 
 bot.use(async (ctx, next) => {
-    const super_admin_list = [1038293334];
+    let is_register_user = await check_register_user(ctx.from.id);
+    const super_admin_list = [];
     const command_list = []
     if (command_list.includes(ctx.message?.text)) {
         const stats = await ctx.conversation.active();
@@ -78,7 +80,8 @@ bot.use(async (ctx, next) => {
         }
     }
     ctx.config = {
-        super_admin: super_admin_list.includes(ctx.from?.id)
+        super_admin: super_admin_list.includes(ctx.from?.id),
+        is_registered:is_register_user,
     }
 
     let lang = await ctx.i18n.getLocale();
