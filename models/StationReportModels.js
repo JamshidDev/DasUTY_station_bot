@@ -31,6 +31,10 @@ const StationReportSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    action_name_id:{
+        type: mongoose.Schema.ObjectId,
+        ref: "Action"
+    },
 
     cargo_name:{
         type: String,
