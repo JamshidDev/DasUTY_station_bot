@@ -48,6 +48,37 @@ const StationReportSchema = mongoose.Schema({
         type: Number,
         required: true,
     },
+
+    // new field of database
+    wagon_owner:{
+        type: String,
+        required: true,
+    },
+    train_number:{
+        type: Number,
+        required: true,
+    },
+    index_date:{
+        type: Date,
+        required: true,
+    },
+    first_country:{
+        type: String,
+        required: true,
+    },
+    last_country:{
+        type: String,
+        required: true,
+    },
+    last_date:{
+        type: Date,
+        default: null,
+    },
+
+
+
+
+
     active: {
         type: Boolean,
         default: true,

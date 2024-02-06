@@ -8,7 +8,7 @@ const {
 const {check_user, register_user, remove_user, set_user_lang} = require("../controllers/userController");
 const {check_user_admin, logOut_user, my_user_info} = require("../controllers/adminController");
 const {enter_to_station_report, find_cargo_by_station,filter_by_station_time, filter_by_leaving_station, find_leaving_station, filter_by_current_station, find_cargo_by_last_station, find_cargo_by_station_time} = require("../controllers/reportController");
-const {get_all_action} = require("../controllers/actionController")
+const {get_all_action, filter_action_by_name, find_cargo_by_action} = require("../controllers/actionController")
 
 const bot = new Composer();
 const i18n = new I18n({
@@ -95,9 +95,9 @@ async function main_menu_conversation(conversation, ctx) {
     let main_btn = new Keyboard()
         .text("📦 Mahalliy yuklar")
         .row()
-        .text("📦 Import yuklar")
-        .row().text("📦 Eksport yuklar")
-        .row()
+        // .text("📦 Import yuklar")
+        // .row().text("📦 Eksport yuklar")
+        // .row()
         .text("👤 Ma'lumotlarim")
         .text("📤 Chiqish")
         .row()
@@ -690,8 +690,75 @@ Ma'sul mutaxasislar:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const action_name_btn = new Menu("action_name_btn")
+    .dynamic(async (ctx, range) => {
+        let list = ctx.session.session_db.group_station_list
+        list.forEach((item, index) => {
+            range
+                .text( "🚞 "+item.name + " - "+item.count+ " ta vagon" , async (ctx) => {
+                    await ctx.answerCallbackQuery();
+                    await ctx.deleteMessage();
+                    let res_data = await find_cargo_by_action(item.id, item.user_station_id, item.action_name_id);
+                    if(res_data.status){
+                        let station_list = res_data.data;
+                        for(let i=0; i<station_list.length; i++){
+                            let message = station_list[i];
+                            await message_sender_station_data(ctx, message)
+                        }
+                    }
+
+                })
+                .row();
+        })
+    })
+pm.use(action_name_btn)
+
 bot.filter(async (ctx)=> ctx.message?.text.includes('📄')).on("msg", async (ctx) => {
-    console.log(ctx.msg.text)
+    let split_text = ctx.msg.text.split('📄')[0];
+    let res_data = await  filter_action_by_name (split_text.trim(), ctx.from.id);
+    if(res_data.data){
+        console.log(res_data.data)
+
+        let group_station = res_data.data.group_station
+        ctx.session.session_db.group_station_list = group_station;
+        let msg_template =  `
+<b>📊 Hisobot</b>
+    `
+        group_station.forEach((item, index)=>{
+            msg_template =msg_template + `
+ ${item.name}: <b>${item.count}</b>`;
+        })
+
+        msg_template = msg_template +`
+
+<i>📑 Umumiy vagonlar soni</i>: <b>${res_data.data.amount}</b>
+
+
+
+<i>👇Ba'tafsil ma'lumotlarni ko'rish uchun kerakli stansiyani tanlang</i>    
+    `
+        await ctx.reply(msg_template,{
+            parse_mode:"HTML",
+            reply_markup: action_name_btn,
+        })
+
+
+
+    }
 });
 
 

@@ -4,7 +4,6 @@ const mongoose = require('mongoose')
 const adminSchema = mongoose.Schema({
     user_id: {
         type: Number,
-        unique: true,
         default: null,
     },
     full_name: {

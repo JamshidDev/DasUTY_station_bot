@@ -366,6 +366,24 @@ const filter_by_station_time = async (user_id, from, to) => {
     }
 }
 
+const delete_all_old_reports = async () => {
+    try{
+       await STATISTIC_REPORT.deleteMany();
+        return {
+            status:true,
+        }
+    }catch (error){
+        customLogger.log({
+            level: 'error',
+            message: error
+        });
+        return {
+            status:false,
+        }
+    }
+}
+
+
 module.exports = {
     register_report,
     enter_to_station_report,
@@ -376,4 +394,5 @@ module.exports = {
     find_cargo_by_last_station,
     filter_by_station_time,
     find_cargo_by_station_time,
+    delete_all_old_reports,
 }
