@@ -7,8 +7,9 @@ const {
 } = require("@grammyjs/conversations");
 const {check_user, register_user, remove_user, set_user_lang} = require("../controllers/userController");
 const {check_user_admin, logOut_user, my_user_info} = require("../controllers/adminController");
-const {enter_to_station_report, find_cargo_by_station,filter_by_station_time, filter_by_leaving_station, find_leaving_station, filter_by_current_station, find_cargo_by_last_station, find_cargo_by_station_time} = require("../controllers/reportController");
+const {enter_to_station_report, find_cargo_by_station,filter_by_station_time, filter_by_leaving_station, find_leaving_station, filter_by_current_station, find_cargo_by_last_station, find_cargo_by_station_time} = require("../controllers/stationReportController");
 const {get_all_action, filter_action_by_name, find_cargo_by_action} = require("../controllers/actionController")
+const {get_report} = require("../controllers/reportController")
 
 const bot = new Composer();
 const i18n = new I18n({
@@ -649,9 +650,10 @@ pm.hears("◀️️ Orqaga", async (ctx)=>{
 pm.hears("👤 Ma'lumotlarim", async (ctx)=>{
 
     let res_data = await my_user_info(ctx.from.id);
+    let report_data = await get_report();
+    let report = report_data.data[0];
 
     if(res_data.status){
-        console.log(res_data.data)
         await ctx.reply(`
 <b>👤 Profil ma'lumotlari</b>  
 
@@ -660,7 +662,11 @@ pm.hears("👤 Ma'lumotlarim", async (ctx)=>{
 ☎️ Tell: <b>+${res_data.data.phone}</b>
 🆔 Id: <b>${ctx.from.id}</b>
 
+<b>HISOBOT</b>
 
+<i>♻️ Turi: <b>${report?.type}</b></i>
+<i>📈 Nomi: <b>${report?.title}</b></i>
+<i>🔄 Oxirgi yangilanish: <b>${report?.date}</b></i>
 
 
     `,{

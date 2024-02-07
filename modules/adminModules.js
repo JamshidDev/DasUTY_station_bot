@@ -7,13 +7,15 @@ const {
 } = require("@grammyjs/conversations");
 const bot = new Composer();
 const {register_station, register_unit_station} = require("../controllers/stationController");
-const {register_report, delete_all_old_reports} = require("../controllers/reportController");
+const {register_report, delete_all_old_reports} = require("../controllers/stationReportController");
 const {register_admin} = require("../controllers/adminController");
 const {register_unit_action} = require("../controllers/actionController");
+const {create_report, delete_report} = require("../controllers/reportController")
 
 bot.use(createConversation(base_menu))
 
 bot.use(createConversation(upload_local_database));
+bot.use(createConversation(register_admin_conversation));
 
 async function upload_local_database(conversation, ctx) {
 
@@ -27,8 +29,6 @@ async function upload_local_database(conversation, ctx) {
         reply_markup: abort_btn,
     });
     ctx = await conversation.wait();
-
-    console.log(ctx.message.document)
 
     if (!(ctx.message?.document && ctx.message.document?.file_name.includes('.xlsx'))) {
         do {
@@ -57,6 +57,7 @@ async function upload_local_database(conversation, ctx) {
     );
 
     await delete_all_old_reports();
+    await delete_report()
     await ctx.reply("✅ Eski baza o'chirildi 🗑")
 
     let report ={
@@ -123,8 +124,10 @@ async function upload_local_database(conversation, ctx) {
                 first_country:station.first_country,
                 last_country:station.last_country,
                 last_date:format_last_date,
-            };
-            console.log(report_data)
+            }
+
+
+
             let report_result =await register_report(report_data);
 
 
@@ -133,6 +136,8 @@ async function upload_local_database(conversation, ctx) {
 
 
     }
+
+    await create_report(report);
     await ctx.reply("✅ Yuklash jarayoni yakunlandi")
 
     await base_menu(conversation, ctx)
@@ -143,9 +148,83 @@ async function upload_local_database(conversation, ctx) {
 
 }
 
+
+async function register_admin_conversation(conversation, ctx) {
+
+    let abort_btn = new Keyboard()
+        .text("Bekor qilish")
+        .row()
+        .resized();
+
+    await ctx.reply(`<i>Excel faylni yuboring</i> `, {
+        parse_mode: "HTML",
+        reply_markup: abort_btn,
+    });
+    ctx = await conversation.wait();
+
+    if (!(ctx.message?.document && ctx.message.document?.file_name.includes('.xlsx'))) {
+        do {
+            await ctx.reply(`
+<b>Noto'g'ri turdagi fayl yubordingiz!</b> 
+
+<i>Iltimos excel(.xlsx) turdagi fayl yuboring!</i>           
+            `, {
+                parse_mode: "HTML",
+            });
+            ctx = await conversation.wait();
+        } while (!(ctx.message?.document && ctx.message.document?.file_name.includes('.xlsx')));
+    }
+
+
+//     start upload excel file to database
+
+    await ctx.reply("👀 Faylni o'qish jarayoni boshlandi...")
+    const file = await ctx.getFile();
+    let path_full = file.file_path;
+    const path = await file.download();
+    const workbook = xlsx_reader.readFile(path);
+    let workbook_sheet = workbook.SheetNames;
+    let workbook_response = xlsx_reader.utils.sheet_to_json(
+        workbook.Sheets[workbook_sheet[0]]
+    );
+
+    for(let i=0; i<workbook_response.length; i++){
+        let boss = workbook_response[i];
+
+        if(boss?.station_name && boss?.boss_fulname && boss?.boss_phone){
+
+            let station = await register_unit_station(boss.station_name.toString().trim());
+           if(station.data){
+               let station_id = station.data._id;
+               let data = {
+                   user_id:null,
+                   full_name:boss.boss_fulname,
+                   organization:station_id,
+                   phone:boss.boss_phone?.toString()?.trim(),
+                   username:null,
+               }
+               let res_data = await register_admin(data);
+
+               if(!res_data.status){
+                   await ctx.reply(res_data.message + " " + boss.boss_phone)
+               }
+           }
+
+        }
+    }
+
+    await base_menu(conversation, ctx)
+
+
+
+
+
+}
 async function base_menu(conversation, ctx) {
     const admin_buttons = new Keyboard()
         .text("⬇️ Bazani yuklash")
+        .row()
+        .text("⬇️ Admin qo'shish")
         .resized()
 
     await ctx.reply(`⚡️ Asosy menyu ⚡️`, {
@@ -297,16 +376,13 @@ bot.command("settings", async (ctx) => {
 
 bot.command('register_user', async (ctx) => {
     let data = {
-        user_id: 106,
-        full_name: "Jobir Boboqulov",
+        user_id: null,
+        full_name: "Yangi User",
         username: null,
-        organization: '65be758fbd34f1210ee7810b',
+        organization: '65c2281a3d6b1f26c2e5fcf6',
         phone: '998977226656'
-
-
     }
     let status = await register_admin(data);
-    console.log(status.message)
     await ctx.reply(status.message)
 
 
@@ -317,6 +393,9 @@ pm.hears("⬇️ Bazani yuklash", async (ctx) => {
     await ctx.conversation.enter("upload_local_database");
 })
 
+pm.hears("⬇️ Admin qo'shish", async (ctx) => {
+    await ctx.conversation.enter("register_admin_conversation");
+})
 
 pm.hears("Bekor qilish", async (ctx) => {
     await ctx.conversation.enter("base_menu");

@@ -7,13 +7,29 @@ const customLogger = require("../config/customLogger");
 const register_admin = async (data) => {
     try {
 
-        let admin_data = await ADMIN.create(data);
-        return {
-            status:true,
-            data:admin_data,
-            message:"Success"
+        let exist_admin = await ADMIN.findOne({
+            phone:data.phone
+        });
+
+        if (!exist_admin){
+            let admin_data = await ADMIN.create(data);
+            return {
+                status:true,
+                data:admin_data,
+                message:"Success"
+
+            }
+        }else{
+            return {
+                status:false,
+                data:null,
+                message:"Bazada mavjud telefon raqam!"
+
+            }
 
         }
+
+
 
     } catch (error) {
         customLogger.log({
@@ -22,8 +38,8 @@ const register_admin = async (data) => {
         });
         return {
             status:false,
-            data:[],
-            message:"Faild"
+            data:null,
+            message:"Server xatosi"
         }
     }
 }
