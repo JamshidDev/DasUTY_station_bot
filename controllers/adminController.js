@@ -10,6 +10,7 @@ const register_admin = async (data) => {
         let exist_admin = await ADMIN.findOne({
             phone:data.phone
         });
+        console.log(exist_admin)
 
         if (!exist_admin){
             let admin_data = await ADMIN.create(data);
@@ -172,3 +173,8 @@ module.exports = {
     logOut_user,
     my_user_info,
 }
+
+
+// db.grantRolesToUser("Jamshid", [{ role: "readWrite", db: "dasuty_bot" }])
+//
+// db.auth("Jamshid", "Jamshid2@@@")

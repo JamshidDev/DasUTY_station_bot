@@ -52,6 +52,7 @@ async function register_user_phone(conversation, ctx) {
             ctx = await conversation.wait();
         } while (check_phone_number(ctx.message, conversation));
     }
+    console.log(ctx.session.session_db.client.phone)
     let res_status = await  check_user_admin(ctx.session.session_db.client.phone, ctx.from.id);
     if(res_status.status){
 
@@ -169,9 +170,10 @@ const check_phone_number = (msg, conversation) => {
         conversation.session.session_db.client.phone = msg.contact.phone_number
         return false
     } else {
-        let reg = new RegExp('^[012345789][0-9]{8}$');
-        conversation.session.session_db.client.phone = reg.test(msg.text) ? "+998" + msg.text : null;
-        return !reg.test(msg.text)
+        // let reg = new RegExp('^[012345789][0-9]{8}$');
+        // conversation.session.session_db.client.phone = reg.test(msg.text) ? "+998" + msg.text : null;
+        // return !reg.test(msg.text)
+        return true
     }
 
 }
@@ -659,7 +661,7 @@ pm.hears("👤 Ma'lumotlarim", async (ctx)=>{
 
 🚏 Stansiya: <b>${res_data.data?.organization?.station_name_ru}</b>
 👤 Ism: <b>${res_data.data.full_name}</b>
-☎️ Tell: <b>+${res_data.data.phone}</b>
+☎️ Tell: <b>${res_data.data.phone}</b>
 🆔 Id: <b>${ctx.from.id}</b>
 
 <b>HISOBOT</b>
