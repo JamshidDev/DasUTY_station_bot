@@ -52,8 +52,14 @@ async function register_user_phone(conversation, ctx) {
             ctx = await conversation.wait();
         } while (check_phone_number(ctx.message, conversation));
     }
-    console.log(ctx.session.session_db.client.phone)
-    let res_status = await  check_user_admin(ctx.session.session_db.client.phone, ctx.from.id);
+
+    let phone_number = ctx.session.session_db.client.phone
+    if(phone_number[0] !== "+"){
+        phone_number = "+"+phone_number;
+    }
+
+
+    let res_status = await  check_user_admin(phone_number, ctx.from.id);
     console.log(res_status)
     if(res_status.status){
 
@@ -736,7 +742,7 @@ const action_name_btn = new Menu("action_name_btn")
     })
 pm.use(action_name_btn)
 
-bot.filter(async (ctx)=> ctx.message?.text.includes('📄')).on("msg", async (ctx) => {
+bot.filter(async (ctx)=> ctx.message?.text?.toString()?.includes('📄')).on("msg", async (ctx) => {
     let split_text = ctx.msg.text.split('📄')[0];
     let res_data = await  filter_action_by_name (split_text.trim(), ctx.from.id);
     if(res_data.data){
