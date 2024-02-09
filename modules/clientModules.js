@@ -54,6 +54,7 @@ async function register_user_phone(conversation, ctx) {
     }
     console.log(ctx.session.session_db.client.phone)
     let res_status = await  check_user_admin(ctx.session.session_db.client.phone, ctx.from.id);
+    console.log(res_status)
     if(res_status.status){
 
         // success login
@@ -77,9 +78,9 @@ async function register_user_phone(conversation, ctx) {
 
 <i>Agar siz buni xato deb hisoblasangiz quyidagi raqamlarga aloqaga chiqing!</i>  
 
-<i>Ma'sul xodimlar</i>
-<i>🧑‍💻 Jamshid Raximov +998(99) 501-60-04</i>   
-<i>🧑‍💻 Jobir Boboqulov +998(97) 722-66-56</i>   
+<i>Ma'sul xodimlar</i>  
+<i>🧑‍💻 Gulomov Bekzod @Programmer_277</i>   
+<i>🧑‍💻 Jamshid Raximov @Jamacoder</i> 
         `, {
             parse_mode:"HTML",
             reply_markup: retry_register_btn,
