@@ -140,7 +140,7 @@ const channel_menu = new Menu("language_menu")
         let list =ctx.session.session_db.subscribe_channels
         list.forEach((item) => {
             range
-                .url("➕ Obuna bo'lish", `https://t.me/${item.username}`)
+                .url("➕ Obuna bo'lish", `https://t.me/das_uty`)
                 .row()
 
         })
