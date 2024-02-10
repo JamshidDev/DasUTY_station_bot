@@ -141,7 +141,7 @@ const channel_menu = new Menu("language_menu")
     .text("✅ Tasdiqlash", async (ctx)=>{
 
         console.log(ctx)
-        const chatMembers = await ctx.chatMembers.getChatMember(-1001704079922, ctx.from.id);
+        const chatMembers = await ctx.chatMembers.getChatMember(-1002093178964, ctx.from.id);
         console.log(chatMembers.status)
 
         if(chatMembers.status ==='left'){
