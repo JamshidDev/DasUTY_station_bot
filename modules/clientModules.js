@@ -242,14 +242,14 @@ async function message_sender_station_data(ctx, msg) {
 🧾 Poyezd index: <b>${msg.index} </b> 
 
 📦 Yuk nomi: <b>${msg.cargo_name}</b>    
-🔍 Yuk massasi: <b>${msg.cargo_massa} kg </b>  
+🔍 Yuk massasi: <b>${Math.ceil(msg.cargo_massa/1000)} t </b>  
  
 🏗 Amal nomi: <b>${msg.action_name}</b>    
 🗓 Amal sanasi: <b>${new Date(msg.action_date).toLocaleDateString('vi-VN')} </b> 
    
 🏁 Chiqqan stansiya: <b>${msg.first_station?.station_name_ru}</b>     
 🏳️ Joriy stansiya: <b>${msg.current_station?.station_name_ru} </b>     
-⏰ Sarflangan vaqt: <b>${msg.wait_time} </b>     
+⏰ Sarflangan vaqt: <b>${msg.wait_time} kun</b>     
 🏴 Borayotgan stansiya: <b>${msg.last_station?.station_name_ru} </b>  
 
 #Hisobot #dasuty_station_bot

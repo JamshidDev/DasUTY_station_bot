@@ -1,4 +1,4 @@
-const { Composer, MemorySessionStorage, session } = require("grammy");
+const { Composer, MemorySessionStorage, session, Keyboard} = require("grammy");
 const { Menu, MenuRange } = require("@grammyjs/menu");
 const { I18n, hears } = require("@grammyjs/i18n");
 const { chatMembers } = require("@grammyjs/chat-members");
@@ -136,81 +136,83 @@ bot.use(async (ctx, next) => {
 // channel subscribe checker
 
 const channel_menu = new Menu("language_menu")
-    .dynamic(async (ctx, range) => {
-        let list =ctx.session.session_db.subscribe_channels
-        list.forEach((item) => {
-            range
-                .url("➕ Obuna bo'lish", `https://t.me/das_uty`)
-                .row()
+    .url("➕ Obuna bo'lish", `https://t.me/das_uty`)
+    .row()
+    .text("✅ Tasdiqlash", async (ctx)=>{
 
-        })
-    }).text("✅ Tasdiqlash", async (ctx)=>{
+        console.log(ctx)
+        const chatMembers = await ctx.chatMembers.getChatMember(-1001704079922, ctx.from.id);
+        console.log(chatMembers.status)
 
-        let list = ctx.session.session_db.subscribe_channels;
-        let is_all_channel_subscribe = true;
-
-
-        for(let i=0; i<list.length; i++){
-            let channel = list[i];
-            const chatMembers = await ctx.chatMembers.getChatMember(channel.telegram_id, ctx.from.id)
-            if(chatMembers.status ==='left'){
-                is_all_channel_subscribe = false
-                break;
-            }
-        }
-
-        if(is_all_channel_subscribe){
-            await ctx.deleteMessage()
-            await ctx.reply(`
-<b>🎉 Botdan foydalanishingiz mumkin!</b>
-
-<i>Kino kodini yozib yuboring</i>            
-            `,{
-                parse_mode: "HTML",
-            })
-
-        }else{
+        if(chatMembers.status ==='left'){
             await ctx.answerCallbackQuery( {
                 callback_query_id:ctx.callbackQuery.id,
-                text:"⚠️ Siz barcha kanallarga obuna bo'lmagansiz!",
+                text:"⚠️ Siz kanalga a'zo bo'lmagansiz!",
                 show_alert:true
+            })
+        }else{
+            await ctx.deleteMessage()
+            let retry_register_btn = new Keyboard()
+                .text("🔒 Tizimga kirish")
+                .resized();
+            await ctx.reply(`
+<b>Salom 👋. DASUTY bot xush kelibsiz</b> 
+
+<i>♻️ Botdan to'liq foydalanish uchun oldin tizimga kirishingiz lozim!</i>  
+ 
+<i>Tizimga kirish uchun <b>[🔒 Tizimga kirish]</b> tugmasini bosing.</i>   
+    `,{
+                parse_mode:"HTML",
+                reply_markup: retry_register_btn,
             })
         }
     })
 bot.use(channel_menu)
 
 
-// bot.filter(async (ctx)=> !ctx.config.super_admin) .chatType("private").use(async (ctx, next)=>{
-//     let res_data=await channelController.ad_item();
-//     if(res_data.channels.length>0){
-//         ctx.session.session_db.subscribe_channels = [];
-//         let is_all_channel_subscribe = true;
-//
-//         for(let i=0; i<res_data.channels.length; i++){
-//             let channel = res_data.channels[i];
-//             const chatMembers = await ctx.chatMembers.getChatMember(channel.telegram_id, ctx.from.id)
-//             if(chatMembers.status ==='left'){
-//                 is_all_channel_subscribe = false
-//                 ctx.session.session_db.subscribe_channels.push({
-//                     name:channel.title,
-//                     username:channel.username,
-//                     telegram_id:channel.telegram_id,
-//                 })
-//             }
-//         }
-//
-//         if(!is_all_channel_subscribe){
-//             await ctx.reply("⚠️ Botdan foydalanish uchun quyidagi kanallarga obuna bo'lishingiz shart!",{
-//                 parse_mode: "HTML",
-//                 reply_markup: channel_menu,
-//             })
-//         }else{
-//             await next()
-//         }
-//     }else{
-//         await next()
-//     }
-// })
+bot.filter(async (ctx)=> !ctx.config.super_admin) .chatType("private").use(async (ctx, next)=>{
+    // let res_data=await channelController.ad_item();
+    // if(res_data.channels.length>0){
+    //     ctx.session.session_db.subscribe_channels = [];
+    //     let is_all_channel_subscribe = true;
+    //
+    //     for(let i=0; i<res_data.channels.length; i++){
+    //         let channel = res_data.channels[i];
+    //         const chatMembers = await ctx.chatMembers.getChatMember(channel.telegram_id, ctx.from.id)
+    //         if(chatMembers.status ==='left'){
+    //             is_all_channel_subscribe = false
+    //             ctx.session.session_db.subscribe_channels.push({
+    //                 name:channel.title,
+    //                 username:channel.username,
+    //                 telegram_id:channel.telegram_id,
+    //             })
+    //         }
+    //     }
+    //
+    //     if(!is_all_channel_subscribe){
+    //         await ctx.reply("⚠️ Botdan foydalanish uchun quyidagi kanallarga obuna bo'lishingiz shart!",{
+    //             parse_mode: "HTML",
+    //             reply_markup: channel_menu,
+    //         })
+    //     }else{
+    //         await next()
+    //     }
+    // }else{
+    //     await next()
+    // }
+
+    const chatMembers = await ctx.chatMembers.getChatMember(-1002093178964, ctx.from.id);
+    if(chatMembers.status ==='left'){
+        await ctx.reply(`Botdan to'liq foydalanish uchun <b>"DAS UTY"</b> MCHJning rasmiy telegram kanaliga a'zo bo'lishingiz kerak.
+        
+        `,{
+            parse_mode: "HTML",
+            reply_markup: channel_menu,
+        })
+    }else{
+        await next()
+    }
+})
 
 
 
