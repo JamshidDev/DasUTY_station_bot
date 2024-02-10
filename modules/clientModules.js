@@ -32,12 +32,12 @@ const pm = bot.chatType("private")
 async function register_user_phone(conversation, ctx) {
 
     let phone_btn = new Keyboard()
-        .requestContact("📞 Telefon raqam")
+        .requestContact("📞 Телефон рақам")
         .resized();
     await ctx.reply(`
-<b>🔒 Tizimga kirish uchun telefon raqamingiz yuboring</b>
+<b>🔒 Тизимга кириш учун телефон рақамингиз юборинг</b>
 
-<i>👇Telefon raqam tugmasini bosing.</i> 
+<i>👇Телефон рақам тугмасини босинг.</i> 
    `, {
         parse_mode: "HTML",
         reply_markup: phone_btn
@@ -46,7 +46,7 @@ async function register_user_phone(conversation, ctx) {
     ctx = await conversation.wait();
     if (check_phone_number(ctx.message, conversation)) {
         do {
-            await ctx.reply("Noto'g'ri formatdagi telefon raqam", {
+            await ctx.reply("Нотўғри форматдаги телефон рақам", {
                 parse_mode: "HTML",
             });
             ctx = await conversation.wait();
@@ -60,12 +60,11 @@ async function register_user_phone(conversation, ctx) {
 
 
     let res_status = await  check_user_admin(phone_number, ctx.from.id);
-    console.log(res_status)
     if(res_status.status){
 
         // success login
         await ctx.reply(`
-<i>🎉 ${res_status.data.full_name} siz tizimga muvofaqiyatli ravishda kirdingiz!</i>      
+<i>🎉 ${res_status.data.full_name} сиз тизимга мувофақиятли равишда кирдингиз!</i>      
         `, {
             parse_mode:"HTML",
             reply_markup: { remove_keyboard: true }
@@ -77,16 +76,15 @@ async function register_user_phone(conversation, ctx) {
     }else{
         // login failed
         let retry_register_btn = new Keyboard()
-            .text("🔒 Tizimga kirish")
+            .text("🔒 Тизимга кириш")
             .resized();
         await ctx.reply(`
-<b>⚠️ Telefon raqam bazadan topilmadi!</b>   
+<b>⚠️ Телефон рақам базадан топилмади!</b>   
 
-<i>Agar siz buni xato deb hisoblasangiz quyidagi raqamlarga aloqaga chiqing!</i>  
+<i>гар сиз буни хато деб ҳисобласангиз қуйидаги  маъсул ходимга алоқага чиқинг!</i>  
 
-<i>Ma'sul xodimlar</i>  
-<i>🧑‍💻 Gulomov Bekzod @Programmer_277</i>   
-<i>🧑‍💻 Jamshid Raximov @Jamacoder</i> 
+<i>Маъсул ходим</i>  
+<i>🧑‍💻 Гуломов Бекзод @Programmer_277</i>   
         `, {
             parse_mode:"HTML",
             reply_markup: retry_register_btn,
@@ -102,18 +100,18 @@ async function register_user_phone(conversation, ctx) {
 async function main_menu_conversation(conversation, ctx) {
 
     let main_btn = new Keyboard()
-        .text("📦 Mahalliy yuklar")
+        .text("📦 Маҳаллий юклар")
         .row()
         // .text("📦 Import yuklar")
         // .row().text("📦 Eksport yuklar")
         // .row()
-        .text("👤 Ma'lumotlarim")
-        .text("📤 Chiqish")
+        .text("👤 Маълумотларим")
+        .text("📤 Чиқиш")
         .row()
-        .text("☎️ Support")
+        .text("☎️ Суппорт")
         .resized();
 
-    await ctx.reply(`<i>⚡️ Asosiy menyu ⚡️</i> `, {
+    await ctx.reply(`<i>⚡️ Асосий меню ⚡️</i> `, {
         parse_mode:"HTML",
         reply_markup: main_btn,
     });
@@ -124,13 +122,13 @@ async function main_menu_conversation(conversation, ctx) {
 async function local_station_conversation(conversation, ctx) {
 
     let group_btn = new Keyboard()
-        .text("🚏 Stansiya bo'yicha")
+        .text("🚏 Стансия бўйича")
         .row()
-        .text("🗞 Amal bo'yicha")
+        .text("🗞 Амал бўйича")
         .row()
-        .text("🔙 Asosiy menyu")
+        .text("🔙 Асосий меню")
         .resized()
-    await ctx.reply("📦 Mahalliy yuklar", {
+    await ctx.reply("📦 Маҳаллий юклар", {
         parse_mode:"HTML",
         reply_markup: group_btn,
     })
@@ -139,17 +137,17 @@ async function local_station_conversation(conversation, ctx) {
 async function station_details_conversation(conversation, ctx) {
 
     let group_btn = new Keyboard()
-        .text("🔼 Kelayotgan vagonlar")
+        .text("🔽 Келаётган вагонлар")
         .row()
-        .text("🔼 Ketayotgan vagonlar")
+        .text("🔼 Кетаётган вагонлар")
         .row()
-        .text("⏹ Turgan vagonlar")
+        .text("⏹ Турган вагонлар")
         .row()
-        .text("🕐 Turgan vagonlar muddati")
+        .text("🕐 Турган вагонлар муддати")
         .row()
-        .text("🔙 Orqaga")
+        .text("🔙 Орқага")
         .resized()
-    await ctx.reply("🚏 Stansiya bo'yicha", {
+    await ctx.reply("🚏 Стансия бўйича", {
         parse_mode:"HTML",
         reply_markup: group_btn,
     })
@@ -158,15 +156,15 @@ async function station_details_conversation(conversation, ctx) {
 async function duration_time_conversation(conversation, ctx) {
 
     let group_btn = new Keyboard()
-        .text("1 kundan - 5 kungacha 🟢")
+        .text("1 кундан - 5 кунгача 🟢")
         .row()
-        .text("6 kundan - 10 kungacha  🟡")
+        .text("6 кундан - 10 кунгача 🟡")
         .row()
-        .text("11 kundan ko'p 🔴")
+        .text("11 кундан кўп 🔴")
         .row()
-        .text("◀️️ Orqaga")
+        .text("◀️ Орқага")
         .resized()
-    await ctx.reply("🚏 Stansiya bo'yicha", {
+    await ctx.reply("🕐 Турган вагонлар муддати", {
         parse_mode:"HTML",
         reply_markup: group_btn,
     })
@@ -191,14 +189,14 @@ pm.command("start", async (ctx) => {
         await ctx.conversation.enter("main_menu_conversation");
     }else{
         let retry_register_btn = new Keyboard()
-            .text("🔒 Tizimga kirish")
+            .text("🔒 Тизимга кириш")
             .resized();
         await ctx.reply(`
-<b>Salom 👋. DASUTY bot xush kelibsiz</b> 
+<b>Салом 👋. DAS UTY ботга хуш келибсиз</b> 
 
-<i>♻️ Botdan to'liq foydalanish uchun oldin tizimga kirishingiz lozim!</i>  
+<i>♻️ Ботдан тўлиқ фойдаланиш учун олдин тизимга киришингиз лозим!</i>  
  
-<i>Tizimga kirish uchun <b>[🔒 Tizimga kirish]</b> tugmasini bosing.</i>   
+<i>Тизимга кириш учун <b>[🔒 Тизимга кириш]</b>  тугмасини босинг.</i>   
     `,{
             parse_mode:"HTML",
             reply_markup: retry_register_btn,
@@ -207,15 +205,15 @@ pm.command("start", async (ctx) => {
 
 })
 
-pm.hears("🔒 Tizimga kirish", async (ctx)=>{
+pm.hears("🔒 Тизимга кириш", async (ctx)=>{
     await ctx.conversation.enter("register_user_phone");
 })
-pm.hears("📤 Chiqish", async (ctx)=>{
+pm.hears("📤 Чиқиш", async (ctx)=>{
     let res_data = await logOut_user(ctx.from.id);
     let retry_register_btn = new Keyboard()
-        .text("🔒 Tizimga kirish")
+        .text("🔒 Тизимга кириш")
         .resized();
-    await ctx.reply("🔴 Tizimdan chiqdingiz!", {
+    await ctx.reply("🔴 Тизимдан чиқдингиз!", {
         parse_mode:"HTML",
         reply_markup: retry_register_btn,
     })
@@ -235,25 +233,25 @@ async function message_sender_station_data(ctx, msg) {
         setTimeout(async () => {
             try {
                 await  ctx.reply(`
-<b><i>#Hisobot</i></b>
+<b><i>#Ҳисобот</i></b>
 <b>${msg.first_station?.station_name_ru}</b> ➡️ <b>${msg.current_station?.station_name_ru}</b> ➡️ <b>${msg.last_station?.station_name_ru}</b>
 
-🚃 Vagon raqami: <b>${msg.vagon_number}</b>  
-🧾 Poyezd index: <b>${msg.index} </b> 
+🚃 Вагон рақами: <b>${msg.vagon_number}</b>  
+🧾 Поезд индех: <b>${msg.index} </b> 
 
-📦 Yuk nomi: <b>${msg.cargo_name}</b>    
-🔍 Yuk massasi: <b>${Math.ceil(msg.cargo_massa/1000)} t </b>  
+📦 Юк номи: <b>${msg.cargo_name}</b>    
+🔍 Юк массаси: <b>${Math.ceil(msg.cargo_massa/1000)} т </b>  
  
-🏗 Amal nomi: <b>${msg.action_name}</b>    
-🗓 Amal sanasi: <b>${new Date(msg.action_date).toLocaleDateString('vi-VN')} </b> 
+🏗 Амал номи: <b>${msg.action_name}</b>    
+🗓 Амал санаси: <b>${new Date(msg.action_date).toLocaleDateString('vi-VN')} </b> 
    
-🏁 Chiqqan stansiya: <b>${msg.first_station?.station_name_ru}</b>     
-🏳️ Joriy stansiya: <b>${msg.current_station?.station_name_ru} </b>     
-⏰ Sarflangan vaqt: <b>${msg.wait_time} kun</b>     
-🏴 Borayotgan stansiya: <b>${msg.last_station?.station_name_ru} </b>  
+🏁 Чиққан стансия: <b>${msg.first_station?.station_name_ru}</b>     
+🏳️ Жорий стансия: <b>${msg.current_station?.station_name_ru} </b>     
+⏰ Сарифланган вақт: <b>${msg.wait_time} кун</b>     
+🏴 Бораётган стансия: <b>${msg.last_station?.station_name_ru} </b>  
 
-#Hisobot #dasuty_station_bot
-Ⓜ️ Manba: @dasuty_station_bot
+#Ҳисобот #dasuty_station_bot
+Ⓜ️ Манба: @dasuty_station_bot
     `, {
                     parse_mode:"HTML",
                 });
@@ -267,7 +265,7 @@ async function message_sender_station_data(ctx, msg) {
 }
 
 
-pm.hears("📦 Mahalliy yuklar", async (ctx)=>{
+pm.hears("📦 Маҳаллий юклар", async (ctx)=>{
 
     await ctx.conversation.enter("local_station_conversation");
 
@@ -295,7 +293,7 @@ const leaving_station_btn = new Menu("leaving_station_btn")
         let list = ctx.session.session_db.group_station_list
         list.forEach((item, index) => {
             range
-                .text( "🚞 "+item.name + " - "+item.count+ " ta vagon" , async (ctx) => {
+                .text( "🚞 "+item.name + " - "+item.count+ " та вагон" , async (ctx) => {
                     await ctx.answerCallbackQuery();
                     await ctx.deleteMessage();
                     let res_data = await find_leaving_station(item.user_station_id, item.id);
@@ -313,14 +311,14 @@ const leaving_station_btn = new Menu("leaving_station_btn")
         })
     })
 pm.use(leaving_station_btn)
-pm.hears("🔼 Ketayotgan vagonlar", async (ctx)=>{
+pm.hears("🔼 Кетаётган вагонлар", async (ctx)=>{
     let user_id = ctx.from.id;
     let res_data = await filter_by_leaving_station(user_id);
 
     let group_station = res_data.data.group_station;
     ctx.session.session_db.group_station_list = group_station;
     let msg_template =  `
-<b>📊 Stansiyadan ketayotgan vagonlarning hozirda turgan stansiyalari bo'yicha hisoboti</b>
+<b>📊 Стансиядан кетаётган вагонларнинг ҳозирда турган стансиялари бўйича ҳисоботи</b>
     `
     group_station.forEach((item, index)=>{
         msg_template =msg_template + `
@@ -329,11 +327,11 @@ pm.hears("🔼 Ketayotgan vagonlar", async (ctx)=>{
 
     msg_template = msg_template +`
 
-<i>📑 Umumiy vagonlar soni</i>: <b>${res_data.data.amount}</b> ta vagon
+<i>📑 Умумий вагонлар сони</i>: <b>${res_data.data.amount}</b> ta vagon
 
 
 
-<i>👇Ba'tafsil ma'lumotlarni ko'rish uchun kerakli stansiyani tanlang</i>    
+<i>👇Баътафсил маълумотларни кўриш учун керакли стансияни танланг</i>    
     `
     await ctx.reply(msg_template,{
         parse_mode:"HTML",
@@ -349,7 +347,7 @@ const current_station_btn = new Menu("current_station_btn")
         let list = ctx.session.session_db.group_station_list
         list.forEach((item, index) => {
             range
-                .text( "🚞 "+item.name + " - "+item.count+ " ta vagon" , async (ctx) => {
+                .text( "🚞 "+item.name + " - "+item.count+ " та вагон" , async (ctx) => {
                     await ctx.answerCallbackQuery();
                     await ctx.deleteMessage();
                     let res_data = await find_cargo_by_last_station(item.user_station_id, item.id);
@@ -367,7 +365,7 @@ const current_station_btn = new Menu("current_station_btn")
         })
     })
 pm.use(current_station_btn)
-pm.hears("⏹ Turgan vagonlar", async (ctx)=>{
+pm.hears("⏹ Турган вагонлар", async (ctx)=>{
     let user_id = ctx.from.id;
     let res_data = await filter_by_current_station(user_id);
 
@@ -376,7 +374,7 @@ pm.hears("⏹ Turgan vagonlar", async (ctx)=>{
 
      ctx.session.session_db.group_station_list = group_station;
     let msg_template =  `
-<b>📊 Stansiyada turgan vagonlarning borayotgan stansiyalari bo'yicha hisoboti</b>
+<b>📊 Стансияда турган вагонларнинг бораётган стансиялари бўйича ҳисоботи</b>
     `
     group_station.forEach((item, index)=>{
         msg_template =msg_template + `
@@ -385,11 +383,11 @@ pm.hears("⏹ Turgan vagonlar", async (ctx)=>{
 
     msg_template = msg_template +`
 
-<i>📑 Umumiy vagonlar soni</i>: <b>${res_data.data.amount}</b> ta vagon
+<i>📑 Умумий вагонлар сони</i>: <b>${res_data.data.amount}</b> ta vagon
 
 
 
-<i>👇Ba'tafsil ma'lumotlarni ko'rish uchun kerakli stansiyani tanlang</i>
+<i>👇Баътафсил маълумотларни кўриш учун керакли стансияни танланг</i>
     `
    await ctx.reply(msg_template,{
        parse_mode:"HTML",
@@ -401,14 +399,14 @@ pm.hears("⏹ Turgan vagonlar", async (ctx)=>{
 
 
 
-pm.hears("🕐 Turgan vagonlar muddati", async (ctx)=>{
+pm.hears("🕐 Турган вагонлар муддати", async (ctx)=>{
     await ctx.conversation.enter("duration_time_conversation");
 
 })
 
 
 
-pm.hears("🗞 Amal bo'yicha", async (ctx)=>{
+pm.hears("🗞 Амал бўйича", async (ctx)=>{
 
     let res_data = await get_all_action();
 
@@ -418,12 +416,12 @@ pm.hears("🗞 Amal bo'yicha", async (ctx)=>{
         .map((label) => [Keyboard.text(label)]);
     const keyboard = Keyboard.from(buttonRows)
         .row()
-        .text("🔙 Orqaga")
+        .text("🔙 Орқага")
         .resized();
 
 
 
-    let msg_template =  `🗞 Amal bo'yicha`
+    let msg_template =  `🗞 Амал бўйича`
     await ctx.reply(msg_template,{
         parse_mode:"HTML",
         reply_markup: keyboard,
@@ -438,7 +436,7 @@ const station_btn = new Menu("station_btn")
         let list = ctx.session.session_db.group_station_list
         list.forEach((item, index) => {
             range
-                .text( "🚞 "+item.name + " - "+item.count+ " ta vagon" , async (ctx) => {
+                .text( "🚞 "+item.name + " - "+item.count+ " та вагон" , async (ctx) => {
                     await ctx.answerCallbackQuery();
                     await ctx.deleteMessage();
                     let res_data = await find_cargo_by_station(item.id, item.user_station_id);
@@ -455,13 +453,13 @@ const station_btn = new Menu("station_btn")
         })
     })
 pm.use(station_btn)
-pm.hears("🔼 Kelayotgan vagonlar", async (ctx)=>{
+pm.hears("🔽 Келаётган вагонлар", async (ctx)=>{
     let user_id = ctx.from.id;
     let res_data = await enter_to_station_report(user_id);
     let group_station = res_data.data.group_station;
     ctx.session.session_db.group_station_list = group_station;
     let msg_template =  `
-<b>📊 Stansiyaga kelayotgan vagonlarning hozirda turgan stansiyalari bo'yicha hisoboti</b>
+<b>📊 Стансияга келаётган вагонларнинг ҳозирда турган стансиялари бўйича ҳисоботи</b>
     `
     group_station.forEach((item, index)=>{
         msg_template =msg_template + `
@@ -470,11 +468,11 @@ pm.hears("🔼 Kelayotgan vagonlar", async (ctx)=>{
 
     msg_template = msg_template +`
 
-<i>📑 Umumiy vagonlar soni</i>: <b>${res_data.data.amount}</b>
+<i>📑 Умумий вагонлар сони</i>: <b>${res_data.data.amount}</b>
 
 
 
-<i>👇Ba'tafsil ma'lumotlarni ko'rish uchun kerakli stansiyani tanlang</i>    
+<i>👇Баътафсил маълумотларни кўриш учун керакли стансияни танланг</i>    
     `
     await ctx.reply(msg_template,{
         parse_mode:"HTML",
@@ -483,7 +481,7 @@ pm.hears("🔼 Kelayotgan vagonlar", async (ctx)=>{
 
 })
 
-pm.hears("🚏 Stansiya bo'yicha", async (ctx)=>{
+pm.hears("🚏 Стансия бўйича", async (ctx)=>{
     await ctx.conversation.enter("station_details_conversation");
 })
 
@@ -492,7 +490,7 @@ const duration_1_5_btn = new Menu("duration_1_5_btn")
         let list = ctx.session.session_db.group_station_list
         list.forEach((item, index) => {
             range
-                .text( "🚞 "+item.name + " - "+item.count+ " ta vagon" , async (ctx) => {
+                .text( "🚞 "+item.name + " - "+item.count+ " та вагон" , async (ctx) => {
                     await ctx.answerCallbackQuery();
                     await ctx.deleteMessage();
                     let res_data = await find_cargo_by_station_time( item.user_station_id,item.id,0,6 );
@@ -509,13 +507,13 @@ const duration_1_5_btn = new Menu("duration_1_5_btn")
         })
     })
 pm.use(duration_1_5_btn)
-pm.hears("1 kundan - 5 kungacha 🟢", async (ctx)=>{
+pm.hears("1 кундан - 5 кунгача 🟢", async (ctx)=>{
 
     let res_data = await  filter_by_station_time(ctx.from.id, 0,6);
     let group_station = res_data.data.group_station;
     ctx.session.session_db.group_station_list = group_station;
     let msg_template =  `
-<b>🟢 1 kundan - 5 kungacha stansiyada turgan vagonlarning borayotgan stansiyalari bo'yicha hisoboti</b>
+<b>🟢 1 кундан - 5 кунгача стансияда турган вагонларнинг бораётган стансиялари бўйича ҳисоботи</b>
     `
     group_station.forEach((item, index)=>{
         msg_template =msg_template + `
@@ -524,11 +522,11 @@ pm.hears("1 kundan - 5 kungacha 🟢", async (ctx)=>{
 
     msg_template = msg_template +`
 
-<i>📑 Umumiy vagonlar soni</i>: <b>${res_data.data.amount}</b>
+<i>📑 Умумий вагонлар сони</i>: <b>${res_data.data.amount}</b>
 
 
 
-<i>👇Ba'tafsil ma'lumotlarni ko'rish uchun kerakli stansiyani tanlang</i>    
+<i>👇Баътафсил маълумотларни кўриш учун керакли стансияни танланг</i>    
     `
     await ctx.reply(msg_template,{
         parse_mode:"HTML",
@@ -541,7 +539,7 @@ const duration_6_10_btn = new Menu("duration_6_10_btn")
         let list = ctx.session.session_db.group_station_list
         list.forEach((item, index) => {
             range
-                .text( "🚞 "+item.name + " - "+item.count+ " ta vagon" , async (ctx) => {
+                .text( "🚞 "+item.name + " - "+item.count+ " та вагон" , async (ctx) => {
                     await ctx.answerCallbackQuery();
                     await ctx.deleteMessage();
                     let res_data = await find_cargo_by_station_time( item.user_station_id,item.id,5,11 );
@@ -558,13 +556,13 @@ const duration_6_10_btn = new Menu("duration_6_10_btn")
         })
     })
 pm.use(duration_6_10_btn)
-pm.hears("6 kundan - 10 kungacha  🟡", async (ctx)=>{
+pm.hears("6 кундан - 10 кунгача 🟡", async (ctx)=>{
 
     let res_data = await  filter_by_station_time(ctx.from.id, 5,11);
     let group_station = res_data.data.group_station;
     ctx.session.session_db.group_station_list = group_station;
     let msg_template =  `
-<b>⛔️ 6 kundan - 10 kungacha stansiyada turgan vagonlarning borayotgan stansiyalari bo'yicha hisoboti</b>
+<b>⛔️ 6 кундан - 10 кунгача стансияда турган вагонларнинг бораётган стансиялари бўйича ҳисоботи</b>
     `
     group_station.forEach((item, index)=>{
         msg_template =msg_template + `
@@ -573,11 +571,11 @@ pm.hears("6 kundan - 10 kungacha  🟡", async (ctx)=>{
 
     msg_template = msg_template +`
 
-<i>📑 Umumiy vagonlar soni</i>: <b>${res_data.data.amount}</b>
+<i>📑 Умумий вагонлар сони</i>: <b>${res_data.data.amount}</b>
 
 
 
-<i>👇Ba'tafsil ma'lumotlarni ko'rish uchun kerakli stansiyani tanlang</i>    
+<i>👇Баътафсил маълумотларни кўриш учун керакли стансияни танланг</i>    
     `
     await ctx.reply(msg_template,{
         parse_mode:"HTML",
@@ -591,7 +589,7 @@ const duration_11_btn = new Menu("duration_11_btn")
         let list = ctx.session.session_db.group_station_list
         list.forEach((item, index) => {
             range
-                .text( "🚞 "+item.name + " - "+item.count+ " ta vagon" , async (ctx) => {
+                .text( "🚞 "+item.name + " - "+item.count+ " та вагон" , async (ctx) => {
                     await ctx.answerCallbackQuery();
                     await ctx.deleteMessage();
                     let res_data = await find_cargo_by_station_time( item.user_station_id,item.id,10,1000 );
@@ -608,13 +606,13 @@ const duration_11_btn = new Menu("duration_11_btn")
         })
     })
 pm.use(duration_11_btn)
-pm.hears("11 kundan ko'p 🔴", async (ctx)=>{
+pm.hears("11 кундан кўп 🔴", async (ctx)=>{
 
     let res_data = await  filter_by_station_time(ctx.from.id, 10,1000);
     let group_station = res_data.data.group_station;
     ctx.session.session_db.group_station_list = group_station;
     let msg_template =  `
-<b>⛔️ 11 kundan ko'p stansiyada turgan vagonlarning borayotgan stansiyalari bo'yicha hisoboti</b>
+<b>⛔️ 11 кундан кўп стансияда турган вагонларнинг бораётган стансиялари бўйича ҳисоботи</b>
     `
     group_station.forEach((item, index)=>{
         msg_template =msg_template + `
@@ -623,11 +621,11 @@ pm.hears("11 kundan ko'p 🔴", async (ctx)=>{
 
     msg_template = msg_template +`
 
-<i>📑 Umumiy vagonlar soni</i>: <b>${res_data.data.amount}</b>
+<i>📑 Умумий вагонлар сони</i>: <b>${res_data.data.amount}</b>
 
 
 
-<i>👇Ba'tafsil ma'lumotlarni ko'rish uchun kerakli stansiyani tanlang</i>    
+<i>👇Баътафсил маълумотларни кўриш учун керакли стансияни танланг</i>    
     `
     await ctx.reply(msg_template,{
         parse_mode:"HTML",
@@ -638,15 +636,15 @@ pm.hears("11 kundan ko'p 🔴", async (ctx)=>{
 
 
 // back buttons
-pm.hears("🔙 Asosiy menyu", async (ctx)=>{
+pm.hears("🔙 Асосий меню", async (ctx)=>{
     await ctx.conversation.enter("main_menu_conversation");
 })
 
-pm.hears("🔙 Orqaga", async (ctx)=>{
+pm.hears("🔙 Орқага", async (ctx)=>{
     await ctx.conversation.enter("local_station_conversation");
 })
 
-pm.hears("◀️️ Orqaga", async (ctx)=>{
+pm.hears("◀️ Орқага", async (ctx)=>{
     await ctx.conversation.enter("station_details_conversation");
 })
 
@@ -656,7 +654,7 @@ pm.hears("◀️️ Orqaga", async (ctx)=>{
 
 
 // main menu buttons
-pm.hears("👤 Ma'lumotlarim", async (ctx)=>{
+pm.hears("👤 Маълумотларим", async (ctx)=>{
 
     let res_data = await my_user_info(ctx.from.id);
     let report_data = await get_report();
@@ -664,18 +662,18 @@ pm.hears("👤 Ma'lumotlarim", async (ctx)=>{
 
     if(res_data.status){
         await ctx.reply(`
-<b>👤 Profil ma'lumotlari</b>  
+<b>👤 Профил маълумотларим</b>  
 
-🚏 Stansiya: <b>${res_data.data?.organization?.station_name_ru}</b>
-👤 Ism: <b>${res_data.data.full_name}</b>
-☎️ Tell: <b>${res_data.data.phone}</b>
-🆔 Id: <b>${ctx.from.id}</b>
+🚏 Стансия: <b>${res_data.data?.organization?.station_name_ru}</b>
+👤 Исм: <b>${res_data.data.full_name}</b>
+☎️ Телл: <b>${res_data.data.phone}</b>
+🆔 Ид: <b>${ctx.from.id}</b>
 
-<b>HISOBOT</b>
+<b>ҲИСОБОТ</b>
 
-<i>♻️ Turi: <b>${report?.type}</b></i>
-<i>📈 Nomi: <b>${report?.title}</b></i>
-<i>🔄 Oxirgi yangilanish: <b>${report?.date}</b></i>
+<i>♻️ Тури: <b>${report?.type}</b></i>
+<i>📈 Номи: <b>${report?.title}</b></i>
+<i>🔄 Охирги янгиланиш: <b>${report?.date}</b></i>
 
 
     `,{
@@ -685,17 +683,17 @@ pm.hears("👤 Ma'lumotlarim", async (ctx)=>{
 
 
 })
-pm.hears("☎️ Support", async (ctx)=>{
+pm.hears("☎️ Суппорт", async (ctx)=>{
     await ctx.reply(`
-<b>☎️ Tezkor qo'llab quvatlash markazi</b>  
+<b>☎️ Тезкор қўллаб қуватлаш маркази</b>  
 
-Ma'sul mutaxasislar:
-<i>🧑‍💻 Jobir Boboqulov</i>
-<b>☎️ +998(97) 772-66-56</b>  
-<i>🧑‍💻 Jamshid Raximov</i>
-<b>☎️ +998(99) 501-60-04</b>  
+Маъсул мутахасислар:
+<i>🧑‍💻 Бекзод Гуломов</i>
+<b>☎️ @Programmer_277</b>  
+<i>🧑‍💻 Жамшид Рахимов</i>
+<b>☎️ @Jamacoder</b>  
 
-<i>✍️ Botdan foydalanish vaqtida qandaydir xatolikni sezsangiz mutaxasislarimizga xabar berishingizni so'raymiz!</i>
+<i>✍️ Ботдан фойдаланиш вақтида қандайдир хатоликни сезсангиз мутахасисларимизга хабар беришингизни сўраймиз!</i>
 
     `,{
         parse_mode:"HTML",
@@ -724,7 +722,7 @@ const action_name_btn = new Menu("action_name_btn")
         let list = ctx.session.session_db.group_station_list
         list.forEach((item, index) => {
             range
-                .text( "🚞 "+item.name + " - "+item.count+ " ta vagon" , async (ctx) => {
+                .text( "🚞 "+item.name + " - "+item.count+ " та вагон" , async (ctx) => {
                     await ctx.answerCallbackQuery();
                     await ctx.deleteMessage();
                     let res_data = await find_cargo_by_action(item.id, item.user_station_id, item.action_name_id);
@@ -751,7 +749,7 @@ bot.filter(async (ctx)=> ctx.message?.text?.toString()?.includes('📄')).on("ms
         let group_station = res_data.data.group_station
         ctx.session.session_db.group_station_list = group_station;
         let msg_template =  `
-<b>📊 Hisobot</b>
+<b>📊 Ҳисобот</b>
     `
         group_station.forEach((item, index)=>{
             msg_template =msg_template + `
@@ -760,11 +758,11 @@ bot.filter(async (ctx)=> ctx.message?.text?.toString()?.includes('📄')).on("ms
 
         msg_template = msg_template +`
 
-<i>📑 Umumiy vagonlar soni</i>: <b>${res_data.data.amount}</b>
+<i>📑 Умумий вагонлар сони</i>: <b>${res_data.data.amount}</b>
 
 
 
-<i>👇Ba'tafsil ma'lumotlarni ko'rish uchun kerakli stansiyani tanlang</i>    
+<i>👇 Баътафсил маълумотларни кўриш учун керакли стансияни танланг</i>    
     `
         await ctx.reply(msg_template,{
             parse_mode:"HTML",

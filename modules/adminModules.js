@@ -188,11 +188,14 @@ async function register_admin_conversation(conversation, ctx) {
         workbook.Sheets[workbook_sheet[0]]
     );
 
+    let registeredPhone = []
+
     for(let i=0; i<workbook_response.length; i++){
         let boss = workbook_response[i];
 
         if(boss?.station_name && boss?.boss_fulname && boss?.boss_phone){
-
+            let format_phone =boss.boss_phone.replace(/ /g, "");
+            console.log(format_phone)
             let station = await register_unit_station(boss.station_name.toString().trim());
            if(station.data){
                let station_id = station.data._id;
@@ -200,19 +203,25 @@ async function register_admin_conversation(conversation, ctx) {
                    user_id:null,
                    full_name:boss.boss_fulname,
                    organization:station_id,
-                   phone:boss.boss_phone?.toString()?.trim(),
+                   phone:format_phone.toString()?.trim(),
                    username:null,
                }
                let res_data = await register_admin(data);
 
-               if(!res_data.status){
-                   await ctx.reply(res_data.message + " " + boss.boss_phone)
+               if(res_data.status){
+                   let template_text = `
+${station.data.station_name_ru} - ${boss.boss_fulname} - ${format_phone}`
+                   registeredPhone.push(template_text)
                }
            }
 
         }
     }
 
+    let status_text = registeredPhone.length>0? registeredPhone.toString() : "Bazaga ma'lumot qo'wilmadi!"
+    await ctx.reply(status_text, {
+        parse_mode:"HTML",
+    })
     await base_menu(conversation, ctx)
 
 

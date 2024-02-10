@@ -136,9 +136,9 @@ bot.use(async (ctx, next) => {
 // channel subscribe checker
 
 const channel_menu = new Menu("language_menu")
-    .url("➕ Obuna bo'lish", `https://t.me/das_uty`)
+    .url("➕ Обуна бўлиш", `https://t.me/das_uty`)
     .row()
-    .text("✅ Tasdiqlash", async (ctx)=>{
+    .text("✅ Тасдиқлаш", async (ctx)=>{
 
         console.log(ctx)
         const chatMembers = await ctx.chatMembers.getChatMember(-1002093178964, ctx.from.id);
@@ -147,20 +147,20 @@ const channel_menu = new Menu("language_menu")
         if(chatMembers.status ==='left'){
             await ctx.answerCallbackQuery( {
                 callback_query_id:ctx.callbackQuery.id,
-                text:"⚠️ Siz kanalga a'zo bo'lmagansiz!",
+                text:"⚠️ Сиз каналга аъзо бўлмагансиз!",
                 show_alert:true
             })
         }else{
             await ctx.deleteMessage()
             let retry_register_btn = new Keyboard()
-                .text("🔒 Tizimga kirish")
+                .text("🔒 Тизимга кириш")
                 .resized();
             await ctx.reply(`
-<b>Salom 👋. DASUTY bot xush kelibsiz</b> 
+<b>Салом 👋. DAS UTY ботга хуш келибсиз</b> 
 
-<i>♻️ Botdan to'liq foydalanish uchun oldin tizimga kirishingiz lozim!</i>  
+<i>♻️ Ботдан тўлиқ фойдаланиш учун олдин тизимга киришингиз лозим!</i>  
  
-<i>Tizimga kirish uchun <b>[🔒 Tizimga kirish]</b> tugmasini bosing.</i>   
+<i>Тизимга кириш учун <b>[🔒 Тизимга кириш]</b>  тугмасини босинг.</i>   
     `,{
                 parse_mode:"HTML",
                 reply_markup: retry_register_btn,
@@ -203,8 +203,8 @@ bot.filter(async (ctx)=> !ctx.config.super_admin) .chatType("private").use(async
 
     const chatMembers = await ctx.chatMembers.getChatMember(-1002093178964, ctx.from.id);
     if(chatMembers.status ==='left'){
-        await ctx.reply(`Botdan to'liq foydalanish uchun <b>"DAS UTY"</b> MCHJning rasmiy telegram kanaliga a'zo bo'lishingiz kerak.
-        
+        await ctx.reply(`Ботдан тўлиқ фойдаланиш учун  <b>"DAS UTY"</b>  МЧЖнинг расмий телеграм каналига аъзо бўлишингиз керак.
+
         `,{
             parse_mode: "HTML",
             reply_markup: channel_menu,
