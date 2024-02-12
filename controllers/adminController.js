@@ -161,6 +161,28 @@ const logOut_user = async (user_id)=>{
     }
 };
 
+const get_admin_list = async (phone, user_id) => {
+    try {
+        let admin_data = await ADMIN.find({}).populate('organization');
+
+        return  {
+            status:true,
+            data:admin_data,
+            message:"Success"
+        }
+
+    } catch (error) {
+        customLogger.log({
+            level: 'error',
+            message: error
+        });
+        return {
+            status:false,
+            data:[],
+            message:"Faild"
+        }
+    }
+}
 
 
 
@@ -172,6 +194,7 @@ module.exports = {
     check_register_user,
     logOut_user,
     my_user_info,
+    get_admin_list,
 }
 
 

@@ -189,10 +189,6 @@ const find_leaving_station = async (first_station, current_station) => {
 }
 
 
-
-
-
-
 const filter_by_leaving_station = async (user_id) => {
     try{
         let admin_station = await ADMIN.findOne({

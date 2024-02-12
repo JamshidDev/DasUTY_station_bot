@@ -1,14 +1,15 @@
-const {Composer, Keyboard} = require("grammy");
+const {Composer, Keyboard,InputFile} = require("grammy");
 const {Menu, MenuRange} = require("@grammyjs/menu");
 const {I18n, hears} = require("@grammyjs/i18n");
-const xlsx_reader = require('xlsx')
+const xlsx_reader = require('xlsx');
+const fs = require('fs');
 const {
     createConversation,
 } = require("@grammyjs/conversations");
 const bot = new Composer();
-const {register_station, register_unit_station} = require("../controllers/stationController");
+const {register_station, register_unit_station, download_station_list} = require("../controllers/stationController");
 const {register_report, delete_all_old_reports} = require("../controllers/stationReportController");
-const {register_admin} = require("../controllers/adminController");
+const {register_admin, get_admin_list} = require("../controllers/adminController");
 const {register_unit_action} = require("../controllers/actionController");
 const {create_report, delete_report} = require("../controllers/reportController")
 
@@ -242,6 +243,7 @@ async function base_menu(conversation, ctx) {
 }
 
 
+
 const pm = bot.chatType("private");
 
 
@@ -259,6 +261,66 @@ bot.command("settings", async (ctx) => {
 
     let status = await register_station(data);
     console.log(status)
+})
+
+
+bot.command("send_file_me", async (ctx)=>{
+    let file_path =  new InputFile("./example.txt")
+    await  ctx.replyWithDocument(file_path)
+})
+
+
+bot.command("admins_list", async (ctx)=>{
+    let res_data = await get_admin_list();
+   if(res_data.status){
+       let template_text = ''
+       for( let i=0; i<res_data.data.length; i++){
+            let admin = res_data.data[i];
+
+           let text =`${admin.full_name}#${admin.phone}#${admin.organization.station_name_ru}#${admin.user_id}    
+           `
+           template_text = template_text + text;
+
+       }
+       const filePath = 'example.txt';
+       const content = template_text;
+
+       fs.writeFile(filePath, content, 'utf8', err => {
+           if (err) {
+               console.error('Error writing to file:', err);
+               return;
+           }
+           console.log('File successfully written!');
+       });
+
+       await ctx.reply("ok", {
+           parse_mode: "HTML",
+       })
+   }
+
+})
+
+
+bot.command("get_station_list", async (ctx)=>{
+    try{
+        await ctx.reply("Kuting...")
+        let res_data = await download_station_list();
+        let template_text = res_data.data;
+        const filePath = 'example.txt';
+        fs.writeFile(filePath, template_text, 'utf8', err => {
+            if (err) {
+                console.error('Error writing to file:', err);
+                return;
+            }
+            console.log('File successfully written!');
+        });
+
+
+        await ctx.reply("Yakunlandi");
+
+    }catch (error){
+
+    }
 })
 
 // station list upload

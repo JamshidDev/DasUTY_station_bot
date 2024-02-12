@@ -171,36 +171,6 @@ bot.use(channel_menu)
 
 
 bot.filter(async (ctx)=> !ctx.config.super_admin) .chatType("private").use(async (ctx, next)=>{
-    // let res_data=await channelController.ad_item();
-    // if(res_data.channels.length>0){
-    //     ctx.session.session_db.subscribe_channels = [];
-    //     let is_all_channel_subscribe = true;
-    //
-    //     for(let i=0; i<res_data.channels.length; i++){
-    //         let channel = res_data.channels[i];
-    //         const chatMembers = await ctx.chatMembers.getChatMember(channel.telegram_id, ctx.from.id)
-    //         if(chatMembers.status ==='left'){
-    //             is_all_channel_subscribe = false
-    //             ctx.session.session_db.subscribe_channels.push({
-    //                 name:channel.title,
-    //                 username:channel.username,
-    //                 telegram_id:channel.telegram_id,
-    //             })
-    //         }
-    //     }
-    //
-    //     if(!is_all_channel_subscribe){
-    //         await ctx.reply("⚠️ Botdan foydalanish uchun quyidagi kanallarga obuna bo'lishingiz shart!",{
-    //             parse_mode: "HTML",
-    //             reply_markup: channel_menu,
-    //         })
-    //     }else{
-    //         await next()
-    //     }
-    // }else{
-    //     await next()
-    // }
-
     const chatMembers = await ctx.chatMembers.getChatMember(-1002093178964, ctx.from.id);
     if(chatMembers.status ==='left'){
         await ctx.reply(`Ботдан тўлиқ фойдаланиш учун  <b>"DAS UTY"</b>  МЧЖнинг расмий телеграм каналига аъзо бўлишингиз керак.
