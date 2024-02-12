@@ -73,7 +73,7 @@ bot.use(conversations());
 bot.use(async (ctx, next) => {
     let res_data = await check_register_user(ctx.from.id);
     // 1038293334
-    const super_admin_list = [1038293334];
+    const super_admin_list = [1038293334,5175158552];
     const command_list = ["Bekor qilish"]
     if (command_list.includes(ctx.message?.text)) {
         const stats = await ctx.conversation.active();

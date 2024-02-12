@@ -150,6 +150,19 @@ async function upload_local_database(conversation, ctx) {
 }
 
 
+
+const replaceText = async(text)=>{
+    let list = [
+        {
+            from:'2',
+            to:'II'
+        }
+    ]
+
+}
+
+
+
 async function register_admin_conversation(conversation, ctx) {
 
     let abort_btn = new Keyboard()
@@ -193,11 +206,13 @@ async function register_admin_conversation(conversation, ctx) {
 
     for(let i=0; i<workbook_response.length; i++){
         let boss = workbook_response[i];
+        console.log(boss)
 
         if(boss?.station_name && boss?.boss_fulname && boss?.boss_phone){
-            let format_phone =boss.boss_phone.replace(/ /g, "");
+            let format_phone =boss.boss_phone.toString().replace(/ /g, "");
             console.log(format_phone)
-            let station = await register_unit_station(boss.station_name.toString().trim());
+            let station = await register_unit_station(boss.station_name.toString().trim())
+            console.log(station.data)
            if(station.data){
                let station_id = station.data._id;
                let data = {
@@ -264,13 +279,11 @@ bot.command("settings", async (ctx) => {
 })
 
 
-bot.command("send_file_me", async (ctx)=>{
-    let file_path =  new InputFile("./example.txt")
-    await  ctx.replyWithDocument(file_path)
-})
-
 
 bot.command("admins_list", async (ctx)=>{
+    await ctx.reply("Kuting...", {
+        parse_mode: "HTML",
+    });
     let res_data = await get_admin_list();
    if(res_data.status){
        let template_text = ''
@@ -293,15 +306,18 @@ bot.command("admins_list", async (ctx)=>{
            console.log('File successfully written!');
        });
 
-       await ctx.reply("ok", {
+       await ctx.reply("Yakunlandi", {
            parse_mode: "HTML",
-       })
+       });
+       let file_path =  new InputFile("./example.txt")
+       await  ctx.replyWithDocument(file_path)
    }
 
 })
 
 
-bot.command("get_station_list", async (ctx)=>{
+bot.command("get_station_list", async (ctx)=>
+{
     try{
         await ctx.reply("Kuting...")
         let res_data = await download_station_list();
@@ -314,8 +330,8 @@ bot.command("get_station_list", async (ctx)=>{
             }
             console.log('File successfully written!');
         });
-
-
+        let file_path =  new InputFile("./example.txt");
+        await  ctx.replyWithDocument(file_path);
         await ctx.reply("Yakunlandi");
 
     }catch (error){
@@ -444,20 +460,6 @@ bot.command("get_station_list", async (ctx)=>{
 //     await ctx.reply("✅ Yuklash jarayoni yakunlandi")
 // })
 
-
-bot.command('register_user', async (ctx) => {
-    let data = {
-        user_id: null,
-        full_name: "Yangi User",
-        username: null,
-        organization: '65c2281a3d6b1f26c2e5fcf6',
-        phone: '998977226656'
-    }
-    let status = await register_admin(data);
-    await ctx.reply(status.message)
-
-
-})
 
 
 pm.hears("⬇️ Bazani yuklash", async (ctx) => {

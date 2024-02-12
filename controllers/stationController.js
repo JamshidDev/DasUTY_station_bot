@@ -4,10 +4,6 @@ const ADMIN= require("../models/adminModels");
 const customLogger = require("../config/customLogger");
 
 
-
-
-
-
 const register_station = async (data) => {
     try {
         let station_count =await STATION.find().countDocuments({});
