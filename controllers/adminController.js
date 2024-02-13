@@ -1,5 +1,6 @@
 const ADMIN= require("../models/adminModels");
 const customLogger = require("../config/customLogger");
+const STATION = require("../models/StationModels");
 
 
 
@@ -184,7 +185,26 @@ const get_admin_list = async (phone, user_id) => {
     }
 }
 
+const migration_collection_admin = async ()=>{
+    try{
 
+        return  await ADMIN.updateMany({}, { $set: { role_id: 1 }}, (err, result) => {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log('Documents updated successfully!');
+            }
+        });
+
+    }catch(error){
+        customLogger.log({
+            level: 'error',
+            message: error
+        });
+        console.log(error)
+        return 0;
+    }
+}
 
 
 
@@ -195,6 +215,7 @@ module.exports = {
     logOut_user,
     my_user_info,
     get_admin_list,
+    migration_collection_admin
 }
 
 

@@ -33,6 +33,7 @@ bot.use(session({
                 },
                 subscribe_channels:[],
                 group_station_list:[],
+                is_register_user:false,
             }
         },
         storage: new MemorySessionStorage(),
@@ -85,17 +86,24 @@ bot.use(async (ctx, next) => {
         super_admin: super_admin_list.includes(ctx.from?.id),
         is_registered:res_data.is_register,
     }
-
-    let lang = await ctx.i18n.getLocale();
-    if (!i18n.locales.includes(lang)) {
-        await ctx.i18n.setLocale("uz");
-        ctx.config.lang ='uz';
-    }else{
-        ctx.config.lang =lang;
+    if(!ctx.session.session_db.is_register_user){
+        let data  = {
+            user_id:ctx.from.id,
+            full_name:ctx.from.first_name,
+            username:ctx.from.username,
+            lang:ctx.from.language_code
+        }
+        let user = await register_user(data);
+        ctx.session.session_db.is_register_user = true;
     }
 
 
-    // check user join to channel
+
+
+
+
+
+
 
 
     await next()

@@ -8,9 +8,9 @@ const {
     createConversation,
 } = require("@grammyjs/conversations");
 const bot = new Composer();
-const {register_station, register_unit_station, download_station_list} = require("../controllers/stationController");
+const {register_station, register_unit_station, download_station_list,migration_collection_station} = require("../controllers/stationController");
 const {register_report, delete_all_old_reports} = require("../controllers/stationReportController");
-const {register_admin, get_admin_list} = require("../controllers/adminController");
+const {register_admin, get_admin_list, migration_collection_admin} = require("../controllers/adminController");
 const {register_unit_action} = require("../controllers/actionController");
 const {create_report, delete_report} = require("../controllers/reportController")
 
@@ -273,7 +273,10 @@ pm.command('start', async (ctx) => {
 
 
 
-
+pm.command("migration", async (ctx)=>{
+    await migration_collection_admin()
+    await ctx.reply("OK")
+})
 
 
 

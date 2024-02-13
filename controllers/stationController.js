@@ -4,6 +4,7 @@ const ADMIN= require("../models/adminModels");
 const customLogger = require("../config/customLogger");
 
 
+
 const register_station = async (data) => {
     try {
         let station_count =await STATION.find().countDocuments({});
@@ -101,8 +102,34 @@ const download_station_list = async (data) => {
 }
 
 
+const migration_collection_station = async ()=>{
+    try{
+
+      return  await STATION.updateMany({}, { $set: { parent_id: 0 }}, (err, result) => {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log('Documents updated successfully!');
+            }
+        });
+
+    }catch(error){
+        customLogger.log({
+            level: 'error',
+            message: error
+        });
+        console.log(error)
+        return 0;
+    }
+}
+
+
+
+
+
 module.exports = {
     register_station,
     register_unit_station,
     download_station_list,
+    migration_collection_station,
 }

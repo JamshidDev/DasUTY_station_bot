@@ -13,10 +13,10 @@ const StationSchema = mongoose.Schema({
             type: String,
             required: true,
         },
-        // station_index: {
-        //     type: String,
-        //     required: true,
-        // },
+        parent_id: {
+            type: Number,
+            default: null,
+        },
         active: {
             type: Boolean,
             default: true,

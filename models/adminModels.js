@@ -15,6 +15,10 @@ const adminSchema = mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "Station"
     },
+    role_id:{
+        type: Number,
+        default: 1,
+    },
     lang: String,
     phone: String,
     active: {
