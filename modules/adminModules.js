@@ -4,7 +4,6 @@ const {I18n, hears} = require("@grammyjs/i18n");
 const xlsx_reader = require('xlsx');
 const fs = require('fs');
 const ExcelJS = require('exceljs');
-const workbook = new ExcelJS.Workbook();
 const {
     createConversation,
 } = require("@grammyjs/conversations");
@@ -250,8 +249,11 @@ ${station.data.station_name_ru} - ${boss.boss_fulname} - ${format_phone}`
 async function base_menu(conversation, ctx) {
     const admin_buttons = new Keyboard()
         .text("⬇️ Bazani yuklash")
-        .row()
         .text("⬇️ Admin qo'shish")
+        .row()
+        .text("♻️ Stansiyalar")
+        .text("♻️ Stansiya DS")
+        .row()
         .resized()
 
     await ctx.reply(`⚡️ Asosy menyu ⚡️`, {
@@ -271,93 +273,18 @@ pm.command('start', async (ctx) => {
 
 
 
-bot.command("admins_list", async (ctx)=>{
-    await ctx.reply("Kuting...", {
-        parse_mode: "HTML",
-    });
-    let res_data = await get_admin_list();
-   if(res_data.status){
-       const sheet = workbook.addWorksheet("Ma'sullar");
-       sheet.addRow(['Stansiya nomi', 'Stansiya raxbari', 'Telefon raqam', "Telegram ID"]);
-
-       for( let i=0; i<res_data.data.length; i++){
-            let admin = res_data.data[i];
-           sheet.addRow([admin.organization.station_name_ru, admin.full_name, admin.phone, admin.user_id]);
-
-       }
-       const filePath = './stationBoss.xlsx';
-       workbook.xlsx.writeFile(filePath)
-           .then(()=> {
-               console.log('Excel file created successfully.');
-           })
-           .catch(function(error) {
-               console.error('Error:', error);
-           });
 
 
-       await ctx.reply("Yakunlandi", {
-           parse_mode: "HTML",
-       });
-       let file_path =  new InputFile(filePath)
-       await  ctx.replyWithDocument(file_path)
-   }
-
-})
 
 
-bot.command("get_station_list", async (ctx)=>
-{
-    try{
-        await ctx.reply("Kuting...")
-        let res_data = await download_station_list();
-        let station_list = res_data.data;
-        console.log(res_data.status)
 
-        const sheet = workbook.addWorksheet("Stansiyalar");
-        sheet.addRow(['Stansiya nomi', 'Stansiya raxbari', 'Telefon raqam', "Telegram ID"]);
-        for(let i=0; i<station_list.length; i++){
-            let station = station_list[i];
-            sheet.addRow([station.station_name, station.ds || '-:-', station.phone || '-:-', station.id] || '-:-');
-        }
-        const filePath = './station_list.xlsx';
-        workbook.xlsx.writeFile(filePath)
-            .then(function() {
-                console.log('Excel file created successfully.');
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-            });
-        let file_path =  new InputFile(filePath);
-        await ctx.replyWithDocument(file_path);
-        await ctx.reply("Yakunlandi");
-    }catch (error){
-        console.log(error)
-    }
-})
 
-// station list upload
-// bot.on("msg:file", async (ctx)=>{
-//     const file = await ctx.getFile();
-//     let path_full = file.file_path;
-//     const path = await file.download();
-//     const workbook = xlsx_reader.readFile(path);
-//     let workbook_sheet = workbook.SheetNames;
-//     let workbook_response = xlsx_reader.utils.sheet_to_json(
-//         workbook.Sheets[workbook_sheet[0]]
-//     );
-//    for(let i=0; i<workbook_response.length; i++){
-//        let station = workbook_response[i];
-//
-//        let data = {
-//            station_name_uz:station.name_uz.trim(),
-//            station_name_ru:station.name_ru.trim(),
-//            station_index:station.station_index.toString().trim(),
-//        };
-//        let status = await register_station(data);
-//        console.log(status.message)
-//
-//    }
-// })
+
+
+
+
+
+
 
 
 
@@ -367,6 +294,62 @@ pm.hears("⬇️ Bazani yuklash", async (ctx) => {
 
 pm.hears("⬇️ Admin qo'shish", async (ctx) => {
     await ctx.conversation.enter("register_admin_conversation");
+})
+
+pm.hears("♻️ Stansiya DS", async (ctx) => {
+    await ctx.reply("Kuting...", {
+        parse_mode: "HTML",
+    });
+    let res_data = await get_admin_list();
+    if(res_data.status){
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet("sheet1");
+        sheet.addRow(['Stansiya nomi', 'Stansiya raxbari', 'Telefon raqam', "Telegram ID"]);
+
+        for( let i=0; i<res_data.data.length; i++){
+            let admin = res_data.data[i];
+            sheet.addRow([admin.organization.station_name_ru, admin.full_name, admin.phone, admin.user_id]);
+
+        }
+        const filePath = './stationBoss.xlsx';
+        workbook.xlsx.writeFile(filePath)
+            .then(()=> {
+                console.log('Excel file created successfully.');
+                let file_path =  new InputFile(filePath)
+                ctx.replyWithDocument(file_path)
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+
+        await ctx.reply("Yakunlandi")
+
+    }
+})
+
+pm.hears("♻️ Stansiyalar", async (ctx) => {
+    await ctx.reply("Kuting...")
+    let res_data = await download_station_list();
+    let station_list = res_data.data;
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Ma'sullar");
+    sheet.addRow(['Stansiya nomi', 'Stansiya raxbari', 'Telefon raqam', "Telegram ID"]);
+    for(let i=0; i<station_list.length; i++){
+        let station = station_list[i];
+        sheet.addRow([station.station_name, station.ds || '-:-', station.phone || '-:-', station.id] || '-:-');
+    }
+    const filePath = './stationList.xlsx';
+    workbook.xlsx.writeFile(filePath)
+        .then(()=> {
+            console.log('Excel file created successfully.');
+            let file_path =  new InputFile(filePath)
+            ctx.replyWithDocument(file_path)
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+        });
+    await ctx.reply("Yakunlandi");
 })
 
 pm.hears("Bekor qilish", async (ctx) => {
