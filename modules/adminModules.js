@@ -314,7 +314,7 @@ pm.hears("♻️ Stansiya DS", async (ctx) => {
             sheet.addRow([admin.organization.station_name_ru, admin.full_name, admin.phone, admin.user_id]);
 
         }
-        const filePath = './stationBoss.xlsx';
+        const filePath = './download/stationBoss.xlsx';
         workbook.xlsx.writeFile(filePath)
             .then(()=> {
                 console.log('Excel file created successfully.');
@@ -342,7 +342,7 @@ pm.hears("♻️ Stansiyalar", async (ctx) => {
         let station = station_list[i];
         sheet.addRow([station.station_name, station.ds || '-:-', station.phone || '-:-', station.id] || '-:-');
     }
-    const filePath = './stationList.xlsx';
+    const filePath = './download/stationList.xlsx';
     workbook.xlsx.writeFile(filePath)
         .then(()=> {
             console.log('Excel file created successfully.');
