@@ -3,6 +3,8 @@ const {Menu, MenuRange} = require("@grammyjs/menu");
 const {I18n, hears} = require("@grammyjs/i18n");
 const xlsx_reader = require('xlsx');
 const fs = require('fs');
+const ExcelJS = require('exceljs');
+const workbook = new ExcelJS.Workbook();
 const {
     createConversation,
 } = require("@grammyjs/conversations");
@@ -267,17 +269,6 @@ pm.command('start', async (ctx) => {
 })
 
 
-bot.command("settings", async (ctx) => {
-    let data = {
-        station_name_uz: "Stansiya name",
-        station_name_ru: "Stansiya name",
-        station_index: '32423',
-    };
-
-    let status = await register_station(data);
-    console.log(status)
-})
-
 
 
 bot.command("admins_list", async (ctx)=>{
@@ -286,30 +277,28 @@ bot.command("admins_list", async (ctx)=>{
     });
     let res_data = await get_admin_list();
    if(res_data.status){
-       let template_text = ''
+       const sheet = workbook.addWorksheet("Ma'sullar");
+       sheet.addRow(['Stansiya nomi', 'Stansiya raxbari', 'Telefon raqam', "Telegram ID"]);
+
        for( let i=0; i<res_data.data.length; i++){
             let admin = res_data.data[i];
-
-           let text =`${admin.full_name}#${admin.phone}#${admin.organization.station_name_ru}#${admin.user_id}    
-           `
-           template_text = template_text + text;
+           sheet.addRow([admin.organization.station_name_ru, admin.full_name, admin.phone, admin.user_id]);
 
        }
-       const filePath = 'example.txt';
-       const content = template_text;
+       const filePath = './stationBoss.xlsx';
+       workbook.xlsx.writeFile(filePath)
+           .then(()=> {
+               console.log('Excel file created successfully.');
+           })
+           .catch(function(error) {
+               console.error('Error:', error);
+           });
 
-       fs.writeFile(filePath, content, 'utf8', err => {
-           if (err) {
-               console.error('Error writing to file:', err);
-               return;
-           }
-           console.log('File successfully written!');
-       });
 
        await ctx.reply("Yakunlandi", {
            parse_mode: "HTML",
        });
-       let file_path =  new InputFile("./example.txt")
+       let file_path =  new InputFile(filePath)
        await  ctx.replyWithDocument(file_path)
    }
 
@@ -321,21 +310,28 @@ bot.command("get_station_list", async (ctx)=>
     try{
         await ctx.reply("Kuting...")
         let res_data = await download_station_list();
-        let template_text = res_data.data;
-        const filePath = 'example.txt';
-        fs.writeFile(filePath, template_text, 'utf8', err => {
-            if (err) {
-                console.error('Error writing to file:', err);
-                return;
-            }
-            console.log('File successfully written!');
-        });
-        let file_path =  new InputFile("./example.txt");
-        await  ctx.replyWithDocument(file_path);
+        let station_list = res_data.data;
+        console.log(res_data.status)
+
+        const sheet = workbook.addWorksheet("Stansiyalar");
+        sheet.addRow(['Stansiya nomi', 'Stansiya raxbari', 'Telefon raqam', "Telegram ID"]);
+        for(let i=0; i<station_list.length; i++){
+            let station = station_list[i];
+            sheet.addRow([station.station_name, station.ds || '-:-', station.phone || '-:-', station.id] || '-:-');
+        }
+        const filePath = './station_list.xlsx';
+        workbook.xlsx.writeFile(filePath)
+            .then(function() {
+                console.log('Excel file created successfully.');
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+        let file_path =  new InputFile(filePath);
+        await ctx.replyWithDocument(file_path);
         await ctx.reply("Yakunlandi");
-
     }catch (error){
-
+        console.log(error)
     }
 })
 
@@ -361,103 +357,6 @@ bot.command("get_station_list", async (ctx)=>
 //        console.log(status.message)
 //
 //    }
-// })
-
-
-// bot.on("msg:file", async (ctx)=>{
-//
-//     await ctx.reply("👀 Faylni o'qish jarayoni boshlandi...")
-//     const file = await ctx.getFile();
-//     let path_full = file.file_path;
-//     const path = await file.download();
-//     const workbook = xlsx_reader.readFile(path);
-//     let workbook_sheet = workbook.SheetNames;
-//     let workbook_response = xlsx_reader.utils.sheet_to_json(
-//         workbook.Sheets[workbook_sheet[0]]
-//     );
-//
-//     await delete_all_old_reports();
-//     await ctx.reply("✅ Eski baza o'chirildi 🗑")
-//
-//
-//
-//
-//
-//     let report ={
-//         title:null,
-//         date:null,
-//         type:null,
-//     }
-//
-//
-//     for(let i=0; i<workbook_response.length; i++){
-//         let station = workbook_response[i];
-//
-//
-//
-//         if(i===0){
-//             report.title = station.report_number.toString().trim();
-//         }else if(i===1){
-//             report.date = station.report_number.toString().trim();
-//         }else if(i===2){
-//             report.type = station.report_number.toString().trim();
-//         }else{
-//
-//
-//
-//             let first_station_data = await register_unit_station(station.first_station.toString().trim());
-//             let last_station_data = await register_unit_station(station.last_station.trim());
-//             let current_station_data = await register_unit_station(station.current_station.trim());
-//
-//             let action_name_data = await register_unit_action(station.action_name.toString().trim())
-//             const serialNumber = station.action_date;
-//
-//             const excelBaseDate = new Date('1899-12-30'); // Excel's base date is December 30, 1899
-//             const dateValue = new Date(excelBaseDate.getTime() + serialNumber * 24 * 60 * 60 * 1000);
-//             let format_date = dateValue.toISOString();
-//
-//             let index_date_excel = new Date(excelBaseDate.getTime() + station.index_date * 24 * 60 * 60 * 1000);
-//             let format_index_date = index_date_excel.toISOString();
-//
-//             let format_last_date = null;
-//             if(station.last_date){
-//                 let last_date_excel = new Date(excelBaseDate.getTime() + station.last_date * 24 * 60 * 60 * 1000);
-//                 format_last_date = last_date_excel?.toISOString();
-//             }else{
-//                  format_last_date = null;
-//             }
-//
-//
-//
-//             let report_data = {
-//                 vagon_number:station.wagon_number.toString().trim(),
-//                 index:station.train_index.toString().trim(),
-//                 current_station:current_station_data.data?._id,
-//                 first_station:first_station_data.data?._id,
-//                 last_station:last_station_data.data?._id,
-//                 action_date:format_date,
-//                 action_name_id:action_name_data.data._id,
-//                 action_name:station.action_name.toString().trim(),
-//                 cargo_name:station.cargo_name.toString().trim(),
-//                 cargo_massa:station.cargo_massa.toString().trim(),
-//                 wait_time:station.wait_time.toString().trim(),
-//                 wagon_owner:station.wagon_owner,
-//                 train_number:station.train_number,
-//                 index_date:format_index_date,
-//                 first_country:station.first_country,
-//                 last_country:station.last_country,
-//                 last_date:format_last_date,
-//             };
-//             console.log(report_data)
-//             let report_result =await register_report(report_data);
-//
-//
-//         }
-//
-//
-//
-//     }
-//     await ctx.reply("✅ Yuklash jarayoni yakunlandi")
 // })
 
 
