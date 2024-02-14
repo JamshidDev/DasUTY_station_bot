@@ -187,14 +187,15 @@ const get_admin_list = async (phone, user_id) => {
 
 const migration_collection_admin = async ()=>{
     try{
-
-        return  await ADMIN.updateMany({}, { $set: { role_id: 1 }}, (err, result) => {
+        await ADMIN.updateMany({}, { $set: { role_name: "station_ds" }}, (err, result) => {
             if (err) {
                 console.error(err);
             } else {
                 console.log('Documents updated successfully!');
             }
         });
+
+        return 1;
 
     }catch(error){
         customLogger.log({

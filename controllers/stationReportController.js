@@ -362,6 +362,26 @@ const filter_by_station_time = async (user_id, from, to) => {
     }
 }
 
+const search_wagon = async (wagon_number)=>{
+    try{
+        let result = await STATISTIC_REPORT.findOne({vagon_number:wagon_number}).populate("last_station").populate("first_station").populate("current_station");
+        return {
+            status:result || false,
+            data:result
+        }
+
+    }catch (error){
+        customLogger.log({
+            level: 'error',
+            message: error
+        });
+        return {
+            status:false,
+            data:null
+        }
+    }
+}
+
 const delete_all_old_reports = async () => {
     try{
        await STATISTIC_REPORT.deleteMany();
@@ -391,4 +411,5 @@ module.exports = {
     filter_by_station_time,
     find_cargo_by_station_time,
     delete_all_old_reports,
+    search_wagon,
 }

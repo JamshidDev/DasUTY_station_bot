@@ -10,6 +10,9 @@ const {check_register_user} = require("../controllers/adminController")
 const channelController = require("../controllers/channelController")
 const adapter = new MemorySessionStorage();
 
+require('dotenv').config()
+const procces_mode =  process.env.ENVIRONMENT || 'production';
+let isProduction = procces_mode === 'production'
 const bot = new Composer();
 
 const i18n = new I18n({
@@ -75,7 +78,7 @@ bot.use(async (ctx, next) => {
     let res_data = await check_register_user(ctx.from.id);
     // 1038293334
     const super_admin_list = [1038293334,5175158552];
-    const command_list = ["Bekor qilish"]
+    const command_list = ["🔴 Бекор қилиш"]
     if (command_list.includes(ctx.message?.text)) {
         const stats = await ctx.conversation.active();
         for (let key of Object.keys(stats)) {
@@ -178,7 +181,7 @@ const channel_menu = new Menu("language_menu")
 bot.use(channel_menu)
 
 
-bot.filter(async (ctx)=> !ctx.config.super_admin) .chatType("private").use(async (ctx, next)=>{
+bot.filter(async (ctx)=> (isProduction && !ctx.config.super_admin)) .chatType("private").use(async (ctx, next)=>{
     const chatMembers = await ctx.chatMembers.getChatMember(-1002093178964, ctx.from.id);
     if(chatMembers.status ==='left'){
         await ctx.reply(`Ботдан тўлиқ фойдаланиш учун  <b>"DAS UTY"</b>  МЧЖнинг расмий телеграм каналига аъзо бўлишингиз керак.

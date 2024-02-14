@@ -123,7 +123,21 @@ const migration_collection_station = async ()=>{
     }
 }
 
+const update_station_parent = async (_id, parent_id)=>{
+    try{
+        return await STATION.findByIdAndUpdate(_id, {
+            parent_id,
+        });
 
+    }catch(error){
+        customLogger.log({
+            level: 'error',
+            message: error
+        });
+        console.log(error)
+        return 'Faild';
+    }
+}
 
 
 
@@ -132,4 +146,5 @@ module.exports = {
     register_unit_station,
     download_station_list,
     migration_collection_station,
+    update_station_parent,
 }

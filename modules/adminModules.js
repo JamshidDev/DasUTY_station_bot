@@ -8,7 +8,7 @@ const {
     createConversation,
 } = require("@grammyjs/conversations");
 const bot = new Composer();
-const {register_station, register_unit_station, download_station_list,migration_collection_station} = require("../controllers/stationController");
+const {register_station, register_unit_station, download_station_list,migration_collection_station, update_station_parent} = require("../controllers/stationController");
 const {register_report, delete_all_old_reports} = require("../controllers/stationReportController");
 const {register_admin, get_admin_list, migration_collection_admin} = require("../controllers/adminController");
 const {register_unit_action} = require("../controllers/actionController");
@@ -279,9 +279,42 @@ pm.command("migration", async (ctx)=>{
 })
 
 
+bot.command("add_admin", async (ctx)=>{
+    let data = {
+        user_id:null,
+        full_name:"Jamshid Noden",
+        organization:'65c469c9f3cef287ac363496',
+        phone:'+998997777777',
+        username:null,
+        role_name:'station_noden',
+        role_id:2,
+    }
+    let res_data = await register_admin(data);
+    console.log(res_data)
+    await ctx.reply("OK");
+})
 
-
-
+// bot.on("msg:file", async (ctx)=>{
+//     await ctx.reply("👀 Faylni o'qish jarayoni boshlandi...")
+//     const file = await ctx.getFile();
+//     let path_full = file.file_path;
+//     const path = await file.download();
+//     const workbook = xlsx_reader.readFile(path);
+//     let workbook_sheet = workbook.SheetNames;
+//     let workbook_response = xlsx_reader.utils.sheet_to_json(
+//         workbook.Sheets[workbook_sheet[0]]
+//     );
+//     let station_list = workbook_response;
+//     for(let i=0; i<station_list.length; i++){
+//         let element = station_list[i];
+//         let station = await register_unit_station(element.station_name.toString().trim());
+//         if(station.data){
+//             let status  = await  update_station_parent(station.data._id, 3);
+//             console.log(status)
+//         }
+//
+//     }
+// })
 
 
 

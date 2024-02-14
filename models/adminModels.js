@@ -19,6 +19,10 @@ const adminSchema = mongoose.Schema({
         type: Number,
         default: 1,
     },
+    role_name:{
+        type: String,
+        default: 'station_ds',
+    },
     lang: String,
     phone: String,
     active: {
