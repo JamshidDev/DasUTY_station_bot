@@ -91,10 +91,10 @@ const check_register_user = async (user_id)=>{
     try {
         let admin_data = await ADMIN.findOne({
             user_id,
-        })
-
+        }).populate("organization")
         return {
             status:true,
+            data:admin_data,
             is_register:!!admin_data,
             message:"no message"
         }
@@ -106,6 +106,7 @@ const check_register_user = async (user_id)=>{
         });
         return {
             status:false,
+            data:null,
             is_register:null,
             message:"Failed"
         }

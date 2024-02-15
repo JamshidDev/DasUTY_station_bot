@@ -5,14 +5,13 @@ const { chatMembers } = require("@grammyjs/chat-members");
 const {
     conversations,
 } = require("@grammyjs/conversations");
-const { check_user, register_user, remove_user, set_user_lang } = require("../controllers/userController");
+const {register_user} = require("../controllers/userController");
 const {check_register_user} = require("../controllers/adminController")
-const channelController = require("../controllers/channelController")
 const adapter = new MemorySessionStorage();
 
 require('dotenv').config()
-const procces_mode =  process.env.ENVIRONMENT || 'production';
-let isProduction = procces_mode === 'production'
+const proccess_mode =  process.env.ENVIRONMENT || 'production';
+let isProduction = proccess_mode === 'production'
 const bot = new Composer();
 
 const i18n = new I18n({
@@ -23,8 +22,9 @@ const i18n = new I18n({
         return { first_name: ctx.from?.first_name ?? "" };
     },
 });
-bot.use(i18n);
 
+
+bot.use(i18n);
 bot.use(session({
     type: "multi",
     session_db: {
@@ -36,7 +36,19 @@ bot.use(session({
                 },
                 subscribe_channels:[],
                 group_station_list:[],
-                is_register_user:false,
+
+
+                user:{
+                    db_id:null,
+                    station_id:null,
+                    station_name:null,
+                    phone: null,
+                    full_name:null,
+                    role_id:null,
+                    role_name:null,
+                    check_user:false,
+                },
+                register_user:false,
             }
         },
         storage: new MemorySessionStorage(),
@@ -48,37 +60,11 @@ bot.use(session({
 bot.use(chatMembers(adapter));
 bot.use(conversations());
 
-// bot.on("my_chat_member", async (ctx) => {
-//     const status = ctx.update.my_chat_member.new_chat_member.status
-//     if (status === "kicked") {
-//         const stats = await ctx.conversation.active();
-//         for (let key of Object.keys(stats)) {
-//             await ctx.conversation.exit(key);
-//         }
-//         await remove_user(ctx.from.id)
-//     }else if(status === "administrator"){
-//         let data = {
-//             telegram_id: ctx.update.my_chat_member.chat.id,
-//             user_id: ctx.update.my_chat_member.from.id,
-//             title: ctx.update.my_chat_member.chat.title,
-//             username: ctx.update.my_chat_member.chat.username,
-//             type: ctx.update.my_chat_member.chat.type,
-//             new_chat: ctx.update.my_chat_member.new_chat_member, // object
-//         }
-//         channelController.store_item(data)
-//     }else if(status === "left" || status=== "member"){
-//         let telegram_id = ctx.update.my_chat_member.chat.id;
-//         channelController.remove_item(telegram_id)
-//
-//     }
-//
-// });
 
 bot.use(async (ctx, next) => {
-    let res_data = await check_register_user(ctx.from.id);
-    console.log(res_data)
-    // 1038293334
+
     const super_admin_list = [1038293334,5175158552];
+
     const command_list = ["🔴 Бекор қилиш"]
     if (command_list.includes(ctx.message?.text)) {
         const stats = await ctx.conversation.active();
@@ -86,28 +72,49 @@ bot.use(async (ctx, next) => {
             await ctx.conversation.exit(key);
         }
     }
-    ctx.config = {
-        super_admin: super_admin_list.includes(ctx.from?.id),
-        is_registered:res_data.is_register,
+
+
+
+
+
+
+
+
+
+    if(!ctx.session.session_db.user.check_user){
+        let res_data = await check_register_user(ctx.from.id);
+
+        if(res_data.data){
+            let user_data = res_data.data;
+            ctx.session.session_db.user.full_name =user_data.full_name;
+            ctx.session.session_db.user.role_id =user_data.role_id;
+            ctx.session.session_db.user.role_name =user_data.role_name;
+            ctx.session.session_db.user.phone =user_data.phone;
+            ctx.session.session_db.user.db_id =user_data._id;
+            ctx.session.session_db.user.station_name =user_data.organization.station_name_ru;
+            ctx.session.session_db.user.station_id =user_data.organization._id;
+
+            ctx.session.session_db.user.check_user =true;
+        }
     }
-    if(!ctx.session.session_db.is_register_user){
+
+    if(!ctx.session.session_db.register_user){
         let data  = {
             user_id:ctx.from.id,
             full_name:ctx.from.first_name,
             username:ctx.from.username,
             lang:ctx.from.language_code
         }
-        let user = await register_user(data);
-        ctx.session.session_db.is_register_user = true;
+        await register_user(data);
+        ctx.session.session_db.register_user = true;
     }
 
-
-
-
-
-
-
-
+    ctx.config = {
+        super_admin: super_admin_list.includes(ctx.from?.id),
+        is_registered:ctx.session.session_db.user.check_user,
+        role_name: ctx.session.session_db.user.role_name,
+        role_id: ctx.session.session_db.user.role_id,
+    }
 
 
     await next()
