@@ -1,4 +1,4 @@
-const {Composer, Keyboard} = require("grammy");
+const {Composer, Keyboard, InputFile} = require("grammy");
 const {Menu, MenuRange} = require("@grammyjs/menu");
 const {I18n, hears} = require("@grammyjs/i18n");
 const {
@@ -7,9 +7,16 @@ const {
 } = require("@grammyjs/conversations");
 const {check_user, register_user, remove_user, set_user_lang} = require("../controllers/userController");
 const {check_user_admin, logOut_user, my_user_info} = require("../controllers/adminController");
-const {enter_to_station_report, find_cargo_by_station,filter_by_station_time, filter_by_leaving_station, find_leaving_station, filter_by_current_station, find_cargo_by_last_station, find_cargo_by_station_time, search_wagon} = require("../controllers/stationReportController");
+const {enter_to_station_report, find_cargo_by_station,filter_by_station_time, filter_by_leaving_station, find_leaving_station, filter_by_current_station, find_cargo_by_last_station, find_cargo_by_station_time, search_wagon, noden_report_by_station} = require("../controllers/stationReportController");
 const {get_all_action, filter_action_by_name, find_cargo_by_action} = require("../controllers/actionController")
-const {get_report} = require("../controllers/reportController")
+const {get_report} = require("../controllers/reportController");
+const ExcelJS = require('exceljs');
+
+const fs = require('fs');
+const Docxtemplater = require('docxtemplater');
+const PizZip = require("pizzip");
+const path = require("path");
+
 
 const bot = new Composer();
 const i18n = new I18n({
@@ -27,6 +34,9 @@ bot.use(createConversation(local_station_conversation));
 bot.use(createConversation(station_details_conversation));
 bot.use(createConversation(duration_time_conversation));
 bot.use(createConversation(search_wagon_by_number));
+bot.use(createConversation(main_menu_conversation_noden));
+bot.use(createConversation(wagon_type_conversation));
+bot.use(createConversation(wagon_order_conversation));
 
 
 const pm = bot.chatType("private")
@@ -72,9 +82,12 @@ async function register_user_phone(conversation, ctx) {
             parse_mode:"HTML",
             reply_markup: { remove_keyboard: true }
         });
-        await main_menu_conversation(conversation, ctx)
 
-
+        if(ctx.config.role_name === "station_noden"){
+            await main_menu_conversation_noden(conversation, ctx)
+        }else{
+            await main_menu_conversation(conversation, ctx)
+        }
 
     }else{
         // login failed
@@ -105,9 +118,8 @@ async function main_menu_conversation(conversation, ctx) {
     let main_btn = new Keyboard()
         .text("📦 Маҳаллий юклар")
         .row()
-        // .text("📦 Import yuklar")
-        // .row().text("📦 Eksport yuklar")
-        // .row()
+        .text("📃 Вагон буюртма")
+        .row()
         .text("👤 Маълумотларим")
         .text("🔍 Вагон қидирув")
         .row()
@@ -122,7 +134,24 @@ async function main_menu_conversation(conversation, ctx) {
    return;
 }
 
+async function main_menu_conversation_noden(conversation, ctx) {
 
+    let main_btn = new Keyboard()
+        .text("📉 Ҳисобот")
+        .row()
+        .text("👤 Маълумотларим")
+        .text("🔍 Вагон қидирув")
+        .row()
+        .text("📤 Чиқиш")
+        .text("☎️ Суппорт")
+        .resized();
+
+    await ctx.reply(`<i>⚡️ Асосий меню ⚡️</i> `, {
+        parse_mode:"HTML",
+        reply_markup: main_btn,
+    });
+    return;
+}
 async function local_station_conversation(conversation, ctx) {
 
     let group_btn = new Keyboard()
@@ -235,16 +264,110 @@ const check_phone_number = (msg, conversation) => {
         conversation.session.session_db.client.phone = msg.contact.phone_number
         return false
     } else {
-        // let reg = new RegExp('^[012345789][0-9]{8}$');
-        // conversation.session.session_db.client.phone = reg.test(msg.text) ? "+998" + msg.text : null;
-        // return !reg.test(msg.text)
         return true
     }
 
 }
 
+async function wagon_type_conversation(conversation, ctx) {
 
+    let main_btn = new Keyboard()
+        .text("Wagon type 1")
+        .row()
+        .text("Wagon type 2")
+        .row()
+        .text("Wagon type 4")
+        .row()
+        .text("Wagon type 5")
+        .row()
+        .text("Wagon type 6")
+        .row()
+        .text("Wagon type 7")
+        .row()
+        .text("Wagon type 8")
+        .row()
+        .text("Wagon type 9")
+        .row()
+        .text("Wagon type 10")
+        .row()
+        .resized();
+
+    await ctx.reply(`<i>⚡️ Вагон турини танланг ⚡️</i> `, {
+        parse_mode:"HTML",
+        reply_markup: main_btn,
+    });
+}
+
+
+
+async function wagon_order_conversation(conversation, ctx) {
+
+    await ctx.reply(`
+<b>✍️ Вагон сонини киритинг</b>
+
+<i>Масалан: 1; 4; 5</i>    
+    `, {
+        parse_mode:"HTML"
+    });
+
+
+    ctx = await conversation.wait();
+
+
+    if (!(ctx.message?.text && !isNaN(ctx.message?.text))) {
+        do {
+            await ctx.reply(`
+<b>Нотўғри маълумот киритдингиз!</b>    
+
+<i>✍️ Илтимос вагон сони ёзинг</i>
+<i>Масалан: 1; 4; 5</i>        
+            `, {
+                parse_mode: "HTML",
+            });
+            ctx = await conversation.wait();
+        } while (!(ctx.message?.text && !isNaN(ctx.message?.text)));
+    }
+
+
+    await ctx.reply("ok")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+pm.filter(async (ctx)=> ctx.config.role_name === "station_noden").command("start", async (ctx)=>{
+    if(ctx.config.is_registered){
+        await ctx.conversation.enter("main_menu_conversation_noden");
+    }else{
+        let retry_register_btn = new Keyboard()
+            .text("🔒 Тизимга кириш")
+            .resized();
+        await ctx.reply(`
+<b>Салом 👋. DAS UTY ботга хуш келибсиз</b>
+
+<i>♻️ Ботдан тўлиқ фойдаланиш учун олдин тизимга киришингиз лозим!</i>
+
+<i>Тизимга кириш учун <b>[🔒 Тизимга кириш]</b>  тугмасини босинг.</i>
+    `,{
+            parse_mode:"HTML",
+            reply_markup: retry_register_btn,
+        })
+    }
+})
+
+// Station ds start
 pm.command("start", async (ctx) => {
+
+
     if(ctx.config.is_registered){
         await ctx.conversation.enter("main_menu_conversation");
     }else{
@@ -252,11 +375,11 @@ pm.command("start", async (ctx) => {
             .text("🔒 Тизимга кириш")
             .resized();
         await ctx.reply(`
-<b>Салом 👋. DAS UTY ботга хуш келибсиз</b> 
+<b>Салом 👋. DAS UTY ботга хуш келибсиз</b>
 
-<i>♻️ Ботдан тўлиқ фойдаланиш учун олдин тизимга киришингиз лозим!</i>  
- 
-<i>Тизимга кириш учун <b>[🔒 Тизимга кириш]</b>  тугмасини босинг.</i>   
+<i>♻️ Ботдан тўлиқ фойдаланиш учун олдин тизимга киришингиз лозим!</i>
+
+<i>Тизимга кириш учун <b>[🔒 Тизимга кириш]</b>  тугмасини босинг.</i>
     `,{
             parse_mode:"HTML",
             reply_markup: retry_register_btn,
@@ -448,7 +571,6 @@ pm.hears("⏹ Турган вагонлар", async (ctx)=>{
 
 pm.hears("🕐 Турган вагонлар муддати", async (ctx)=>{
     await ctx.conversation.enter("duration_time_conversation");
-
 })
 
 
@@ -679,6 +801,73 @@ pm.hears("11 кундан кўп 🔴", async (ctx)=>{
         reply_markup: duration_11_btn,
     })
 })
+
+pm.hears("📉 Ҳисобот", async (ctx)=>{
+    let res_data = await noden_report_by_station(ctx.config.role_id)
+    if(res_data.status){
+        await ctx.reply("🕓 Hisobot tayorlanmoqda kuting...");
+        const workbook = new ExcelJS.Workbook();
+        const worksheet  = workbook.addWorksheet("Hisobot");
+        worksheet .addRow(['Vagon raqami', 'Chiqqan stansiya', 'Turgan stansiya', "Borayotgan stansiya", "Index"]);
+
+        const rowNumber = 1;
+
+        // Fill color you want to set
+        const fillColor = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '85b2f9' } // Red background color
+        };
+
+        worksheet.getRow(rowNumber).eachCell({ includeEmpty: true }, cell => {
+            cell.fill = fillColor;
+        });
+
+        let station_list = res_data.data;
+        for(let i=0; i<station_list.length; i++){
+            let station = station_list[i];
+            worksheet .addRow([station.vagon_number, station.first_station.station_name_ru, station.current_station.station_name_ru, station.last_station.station_name_ru, station.index,]);
+        }
+        const filePath = './download/reportOfNoden.xlsx';
+        workbook.xlsx.writeFile(filePath)
+            .then(()=> {
+                console.log('Excel file created successfully.');
+                let file_path =  new InputFile(filePath)
+                ctx.replyWithDocument(file_path)
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+        await ctx.reply("✅ Yakunlandi");
+
+
+
+    }
+
+})
+
+
+pm.hears("📃 Вагон буюртма", async (ctx)=>{
+    await ctx.conversation.enter("wagon_type_conversation");
+
+})
+
+pm.hears("Wagon type 1", async (ctx)=>{
+    await ctx.conversation.enter("wagon_order_conversation");
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -76,11 +76,6 @@ bot.use(async (ctx, next) => {
 
 
 
-
-
-
-
-
     if(!ctx.session.session_db.user.check_user){
         let res_data = await check_register_user(ctx.from.id);
 
@@ -108,6 +103,7 @@ bot.use(async (ctx, next) => {
         await register_user(data);
         ctx.session.session_db.register_user = true;
     }
+
 
     ctx.config = {
         super_admin: super_admin_list.includes(ctx.from?.id),

@@ -72,8 +72,6 @@ async function upload_local_database(conversation, ctx) {
     for(let i=0; i<workbook_response.length; i++){
         let station = workbook_response[i];
 
-
-
         if(i===0){
             report.title = station.report_number.toString().trim();
         }else if(i===1){

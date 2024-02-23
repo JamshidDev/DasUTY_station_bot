@@ -5,11 +5,13 @@
     "@grammyjs/files": "^1.0.4",
     "@grammyjs/i18n": "^1.0.1",
     "@grammyjs/menu": "^1.2.1",
+    "docxtemplater": "^3.46.0",
     "dotenv": "^16.3.1",
     "exceljs": "^4.4.0",
     "files": "^2.2.2",
     "grammy": "^1.18.1",
     "mongoose": "^7.5.0",
+    "pizzip": "^3.1.6",
     "read-excel-file": "^5.7.1",
     "winston": "^3.10.0",
     "xlsx": "^0.18.5"

@@ -1,5 +1,6 @@
 const STATISTIC_REPORT= require("../models/StationReportModels");
 const ADMIN= require("../models/adminModels");
+const STATION= require("../models/StationModels");
 const customLogger = require("../config/customLogger");
 
 
@@ -362,6 +363,36 @@ const filter_by_station_time = async (user_id, from, to) => {
     }
 }
 
+const noden_report_by_station = async (parent_id)=>{
+    try{
+        let stations = await  STATION.find({
+            parent_id:parent_id
+        })
+        let station_id_list = stations.map((item)=> item._id);
+        let filter_reports = await  STATISTIC_REPORT.find({
+            last_station:{ $in: station_id_list }
+        }).populate("last_station").populate("first_station").populate("current_station");
+
+
+        return {
+            status:true,
+            data:filter_reports,
+            message:'Success action'
+        }
+    }catch (error){
+        console.log(error)
+        customLogger.log({
+            level: 'error',
+            message: error
+        });
+        return {
+            status:true,
+            data:[],
+            message:'Failed action'
+        }
+    }
+}
+
 const search_wagon = async (wagon_number)=>{
     try{
         let result = await STATISTIC_REPORT.findOne({vagon_number:wagon_number}).populate("last_station").populate("first_station").populate("current_station");
@@ -412,4 +443,5 @@ module.exports = {
     find_cargo_by_station_time,
     delete_all_old_reports,
     search_wagon,
+    noden_report_by_station,
 }
