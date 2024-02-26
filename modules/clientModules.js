@@ -1,11 +1,11 @@
 const {Composer, Keyboard, InputFile, session} = require("grammy");
 const {Menu, MenuRange} = require("@grammyjs/menu");
 const {I18n, hears} = require("@grammyjs/i18n");
+const moment = require('moment-timezone');
 const {
     conversations,
     createConversation,
 } = require("@grammyjs/conversations");
-const {check_user, register_user, remove_user, set_user_lang} = require("../controllers/userController");
 const {check_user_admin, logOut_user, my_user_info} = require("../controllers/adminController");
 const {enter_to_station_report, find_cargo_by_station,filter_by_station_time, filter_by_leaving_station, find_leaving_station, filter_by_current_station, find_cargo_by_last_station, find_cargo_by_station_time, search_wagon, noden_report_by_station} = require("../controllers/stationReportController");
 const {get_all_action, filter_action_by_name, find_cargo_by_action} = require("../controllers/actionController")
@@ -13,11 +13,6 @@ const {get_report} = require("../controllers/reportController");
 const {register_order, wagon_order_report} = require("../controllers/wagonOrderController")
 const ExcelJS = require('exceljs');
 const {wagon_type_list} = require("../Enums/Enums")
-
-const fs = require('fs');
-const Docxtemplater = require('docxtemplater');
-const PizZip = require("pizzip");
-const path = require("path");
 
 
 const bot = new Composer();
@@ -276,30 +271,30 @@ const check_phone_number = (msg, conversation) => {
 }
 
 const check_order_time = ()=>{
-    let current_hour = new Date().getHours();
+    let current_hour = new Date().getHours() + 2;
     let current_minute = new Date().getMinutes();
 
-    // if(current_hour>=6 && current_hour<9){
-    //     return {
-    //         status:true,
-    //         type_id:1,
-    //     }
-    // }else if(current_hour>=17 && current_hour<21){
-    //     return {
-    //         status:true,
-    //         type_id:0,
-    //     }
-    // }else{
-    //     return {
-    //         status:false,
-    //         time:`${current_hour} : ${current_minute}`,
-    //     }
-    // }
-
-    return {
-        status:true,
-        type_id:0,
+    if(current_hour>=6 && current_hour<9){
+        return {
+            status:true,
+            type_id:1,
+        }
+    }else if(current_hour>=17 && current_hour<21){
+        return {
+            status:true,
+            type_id:0,
+        }
+    }else{
+        return {
+            status:false,
+            time:`${current_hour} : ${current_minute}`,
+        }
     }
+
+    // return {
+    //     status:true,
+    //     type_id:0,
+    // }
 }
 
 async function wagon_type_conversation(conversation, ctx) {
@@ -930,7 +925,7 @@ pm.hears("📉 Ҳисобот", async (ctx)=>{
 })
 pm.hears("🗞 Вагон буюртмалар", async (ctx)=>{
     await ctx.reply("Илтимос кутинг")
-    let res_data = await wagon_order_report();
+    let res_data = await wagon_order_report(ctx.config.role_id);
 
 
 
@@ -956,7 +951,10 @@ pm.hears("🗞 Вагон буюртмалар", async (ctx)=>{
             let report = report_list[i];
             let station_name = report.station_id?.station_name_ru;
             let order_comment = report.order_comment;
-            let order_date = new Date(report.created_at).toLocaleString("uz-UZ");
+            // let order_date = new Date(report.created_at).toLocaleString("uz-UZ");
+            const selectedDate = moment(report.created_at);
+            const order_date = selectedDate.tz('Asia/Tashkent').format('YYYY-MM-DD HH:mm:ss')
+
 
             for(let j=0; j<report.order_list.length; j++){
                 let wagon_order = report.order_list[j]
@@ -975,7 +973,7 @@ pm.hears("🗞 Вагон буюртмалар", async (ctx)=>{
             .catch(function(error) {
                 console.error('Error:', error);
             });
-        await ctx.reply("✅ Yakunlandi");
+        await ctx.reply("✅ Якунланди");
 
     }else{
         await ctx.reply("⚠️ Сервер хатоси")

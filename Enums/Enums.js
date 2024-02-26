@@ -1,5 +1,5 @@
 
-let permission=[
+let admin_permission=[
     {
         name:"MTU - 1",
         role_name:"station_noden",
@@ -31,7 +31,7 @@ let permission=[
         role_id:6,
     },
     {
-        name:"Stansiya DSlar",
+        name:"Stansiya DS",
         role_name:"station_ds",
         role_id:1,
     },
@@ -106,4 +106,4 @@ const wagon_order_time = [
 ]
 
 
-module.exports = {wagon_type_list, permission} ;
+module.exports = {wagon_type_list, admin_permission} ;

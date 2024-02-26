@@ -13,6 +13,9 @@ const {register_report, delete_all_old_reports} = require("../controllers/statio
 const {register_admin, get_admin_list, migration_collection_admin} = require("../controllers/adminController");
 const {register_unit_action} = require("../controllers/actionController");
 const {create_report, delete_report} = require("../controllers/reportController")
+const {all_wagon_order_report} = require("../controllers/wagonOrderController");
+const {admin_permission} = require("../Enums/Enums")
+const moment = require("moment-timezone");
 
 bot.use(createConversation(base_menu))
 
@@ -246,6 +249,8 @@ ${station.data.station_name_ru} - ${boss.boss_fulname} - ${format_phone}`
 }
 async function base_menu(conversation, ctx) {
     const admin_buttons = new Keyboard()
+        .text("⬇️ Buyurtma vagonlar")
+        .row()
         .text("⬇️ Bazani yuklash")
         .text("⬇️ Admin qo'shish")
         .row()
@@ -280,12 +285,12 @@ pm.command("migration", async (ctx)=>{
 bot.command("add_admin", async (ctx)=>{
     let data = {
         user_id:null,
-        full_name:"Jamshid Noden",
+        full_name:"Bekzod Noden",
         organization:'65c469c9f3cef287ac363496',
-        phone:'+998997777777',
+        phone:'+998942061918',
         username:null,
         role_name:'station_noden',
-        role_id:2,
+        role_id:3,
     }
     let res_data = await register_admin(data);
     console.log(res_data)
@@ -319,7 +324,65 @@ bot.command("add_admin", async (ctx)=>{
 
 
 
+pm.hears("⬇️ Buyurtma vagonlar", async (ctx) => {
+    await ctx.reply("Iltimos kuting")
+    let res_data = await all_wagon_order_report();
 
+
+    if(res_data.status){
+        const workbook = new ExcelJS.Workbook();
+        const worksheet  = workbook.addWorksheet("Вагон буюртма");
+        worksheet .addRow(['МТУ номи','Стансия номи', 'Вагон тури', 'Вагон сони', "Қўшимча изоҳ", "Вақт"]);
+
+        const rowNumber = 1;
+
+        // Fill color you want to set
+        const fillColor = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '85b2f9' } // Red background color
+        };
+        worksheet.getRow(rowNumber).eachCell({ includeEmpty: true }, cell => {
+            cell.fill = fillColor;
+        });
+
+        let report_list = res_data.data;
+        for(let i=0; i<report_list.length; i++){
+            let report = report_list[i];
+            let station_name = report.station_id?.station_name_ru;
+            let order_comment = report.order_comment;
+            const selectedDate = moment(report.created_at);
+            const order_date = selectedDate.tz('Asia/Tashkent').format('YYYY-MM-DD HH:mm:ss');
+            const mtu_box = admin_permission.filter((item)=> item.role_id === report.station_parent_id);
+            const mtu_name = mtu_box.length>0? mtu_box[0].name : "Biriktirilmagan!"
+
+            for(let j=0; j<report.order_list.length; j++){
+                let wagon_order = report.order_list[j]
+                worksheet .addRow([mtu_name,station_name, wagon_order.name, wagon_order.count,order_comment, order_date ]);
+            }
+
+        }
+
+        const filePath = './download/УмумийВагонБуюртма.xlsx';
+        workbook.xlsx.writeFile(filePath)
+            .then(()=> {
+                console.log('Excel file created successfully.');
+                let file_path =  new InputFile(filePath)
+                ctx.replyWithDocument(file_path)
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+        await ctx.reply("✅ Якунланди");
+
+    }else{
+        await ctx.reply("⚠️ Сервер хатоси")
+    }
+
+
+
+
+})
 
 
 pm.hears("⬇️ Bazani yuklash", async (ctx) => {
