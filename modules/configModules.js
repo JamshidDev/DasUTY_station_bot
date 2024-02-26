@@ -47,8 +47,12 @@ bot.use(session({
                     role_id:null,
                     role_name:null,
                     check_user:false,
+                    station_parent_id:null,
                 },
                 register_user:false,
+                selected_type_wagon:null,
+                selected_wagon_list:[],
+                selected_wagon_comment:null,
             }
         },
         storage: new MemorySessionStorage(),
@@ -79,7 +83,9 @@ bot.use(async (ctx, next) => {
     if(!ctx.session.session_db.user.check_user){
         let res_data = await check_register_user(ctx.from.id);
 
+
         if(res_data.data){
+
             let user_data = res_data.data;
             ctx.session.session_db.user.full_name =user_data.full_name;
             ctx.session.session_db.user.role_id =user_data.role_id;
@@ -88,6 +94,7 @@ bot.use(async (ctx, next) => {
             ctx.session.session_db.user.db_id =user_data._id;
             ctx.session.session_db.user.station_name =user_data.organization.station_name_ru;
             ctx.session.session_db.user.station_id =user_data.organization._id;
+            ctx.session.session_db.user.station_parent_id =user_data.organization.parent_id;
 
             ctx.session.session_db.user.check_user =true;
         }
@@ -110,6 +117,9 @@ bot.use(async (ctx, next) => {
         is_registered:ctx.session.session_db.user.check_user,
         role_name: ctx.session.session_db.user.role_name,
         role_id: ctx.session.session_db.user.role_id,
+        station_id:ctx.session.session_db.user.station_id,
+        station_name:ctx.session.session_db.user.station_name,
+        station_parent_id:ctx.session.session_db.user.station_parent_id,
     }
 
 

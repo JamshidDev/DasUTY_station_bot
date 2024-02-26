@@ -1,4 +1,4 @@
-const {Composer, Keyboard, InputFile} = require("grammy");
+const {Composer, Keyboard, InputFile, session} = require("grammy");
 const {Menu, MenuRange} = require("@grammyjs/menu");
 const {I18n, hears} = require("@grammyjs/i18n");
 const {
@@ -10,7 +10,9 @@ const {check_user_admin, logOut_user, my_user_info} = require("../controllers/ad
 const {enter_to_station_report, find_cargo_by_station,filter_by_station_time, filter_by_leaving_station, find_leaving_station, filter_by_current_station, find_cargo_by_last_station, find_cargo_by_station_time, search_wagon, noden_report_by_station} = require("../controllers/stationReportController");
 const {get_all_action, filter_action_by_name, find_cargo_by_action} = require("../controllers/actionController")
 const {get_report} = require("../controllers/reportController");
+const {register_order, wagon_order_report} = require("../controllers/wagonOrderController")
 const ExcelJS = require('exceljs');
+const {wagon_type_list} = require("../Enums/Enums")
 
 const fs = require('fs');
 const Docxtemplater = require('docxtemplater');
@@ -37,6 +39,8 @@ bot.use(createConversation(search_wagon_by_number));
 bot.use(createConversation(main_menu_conversation_noden));
 bot.use(createConversation(wagon_type_conversation));
 bot.use(createConversation(wagon_order_conversation));
+bot.use(createConversation(confirm_order_conversation));
+bot.use(createConversation(review_order_conversation));
 
 
 const pm = bot.chatType("private")
@@ -138,6 +142,8 @@ async function main_menu_conversation_noden(conversation, ctx) {
 
     let main_btn = new Keyboard()
         .text("📉 Ҳисобот")
+        .row()
+        .text("🗞 Вагон буюртмалар")
         .row()
         .text("👤 Маълумотларим")
         .text("🔍 Вагон қидирув")
@@ -269,45 +275,59 @@ const check_phone_number = (msg, conversation) => {
 
 }
 
+const check_order_time = ()=>{
+    let current_hour = new Date().getHours();
+    let current_minute = new Date().getMinutes();
+
+    // if(current_hour>=6 && current_hour<9){
+    //     return {
+    //         status:true,
+    //         type_id:1,
+    //     }
+    // }else if(current_hour>=17 && current_hour<21){
+    //     return {
+    //         status:true,
+    //         type_id:0,
+    //     }
+    // }else{
+    //     return {
+    //         status:false,
+    //         time:`${current_hour} : ${current_minute}`,
+    //     }
+    // }
+
+    return {
+        status:true,
+        type_id:0,
+    }
+}
+
 async function wagon_type_conversation(conversation, ctx) {
 
-    let main_btn = new Keyboard()
-        .text("Wagon type 1")
+    let group_station = wagon_type_list.map((item)=>item.name +" 🚞")
+    const buttonRows = group_station
+        .map((label) => [Keyboard.text(label)]);
+    const keyboard = Keyboard.from(buttonRows)
         .row()
-        .text("Wagon type 2")
-        .row()
-        .text("Wagon type 4")
-        .row()
-        .text("Wagon type 5")
-        .row()
-        .text("Wagon type 6")
-        .row()
-        .text("Wagon type 7")
-        .row()
-        .text("Wagon type 8")
-        .row()
-        .text("Wagon type 9")
-        .row()
-        .text("Wagon type 10")
-        .row()
+        .text("🔙 Асосий меню")
         .resized();
-
     await ctx.reply(`<i>⚡️ Вагон турини танланг ⚡️</i> `, {
         parse_mode:"HTML",
-        reply_markup: main_btn,
+        reply_markup: keyboard,
     });
 }
 
-
-
 async function wagon_order_conversation(conversation, ctx) {
-
+    let group_btn = new Keyboard()
+        .text("🔴 Бекор қилиш")
+        .resized()
     await ctx.reply(`
 <b>✍️ Вагон сонини киритинг</b>
 
 <i>Масалан: 1; 4; 5</i>    
     `, {
-        parse_mode:"HTML"
+        parse_mode:"HTML",
+        reply_markup:group_btn,
     });
 
 
@@ -328,21 +348,92 @@ async function wagon_order_conversation(conversation, ctx) {
         } while (!(ctx.message?.text && !isNaN(ctx.message?.text)));
     }
 
+    let wagon_count = ctx.message?.text;
+    let selected_wagon = ctx.session.session_db.selected_type_wagon;
+    let wagon_list =  ctx.session.session_db.selected_wagon_list;
 
-    await ctx.reply("ok")
+    wagon_list.push({
+        name:selected_wagon.name,
+        id:selected_wagon.id,
+        count:wagon_count,
+    });
+
+    let action_type_btn = new Keyboard()
+        .text("➕ Вагон қўшиш")
+        .row()
+        .text("☑️ Буюртмани якунлаш")
+        .resized()
+    await ctx.reply(`<i>${wagon_count} - ${selected_wagon.name} ✅</i>`, {
+        parse_mode: "HTML",
+        reply_markup:action_type_btn,
+    });
 }
+async function confirm_order_conversation(conversation, ctx) {
+    let group_btn = new Keyboard()
+        .text("➡️ Ўтказиб юбориш")
+        .resized();
+
+    ctx.session.session_db.selected_wagon_comment = null;
+    await ctx.reply(`
+<b>✍️ Буюртма учун изоҳ ёзинг</b>
+
+<i>💬 Изоҳсиз якунлаш учун <b>➡️ Ўтказиб юбориш</b> тугмасини босиб якунланг!</i>  
+    `, {
+        parse_mode:"HTML",
+        reply_markup:group_btn,
+    });
 
 
+    ctx = await conversation.wait();
 
 
+    if (!(ctx.message?.text)) {
+        do {
+            await ctx.reply(`
+<b>Нотўғри маълумот киритдингиз!</b>    
+
+<i>✍️ Илтимос изоҳ учун матнли хабар ёзинг</i>      
+            `, {
+                parse_mode: "HTML",
+            });
+            ctx = await conversation.wait();
+        } while (!(ctx.message?.text));
+    }
+    if(ctx.message?.text!=='➡️ Ўтказиб юбориш'){
+        ctx.session.session_db.selected_wagon_comment = ctx.message?.text;
+    }
+    await  review_order_conversation(conversation, ctx);
+}
+async function review_order_conversation(conversation, ctx) {
+    let group_btn = new Keyboard()
+        .text("✅ Буюртмани тасдиқлаш")
+        .row()
+        .text("❌ Буюртмани бекор қилиш")
+        .row()
+        .resized();
+
+    let message = `<b>✅ Буюртма маълумотлари</b>
+
+`;
+    let order_list = ctx.session.session_db.selected_wagon_list;
+    let comment = ctx.session.session_db.selected_wagon_comment;
+    let text = ``;
+    for(let i=0; i< order_list.length; i++){
+        let order = order_list[i];
+        text = text + `
+${i+1}) <b>${order.name} - ${order.count} та вагон</b>`
+    }
+    message = message + text +`
 
 
+<i>💬 Изоҳ: ${comment || "Изоҳ ёзилмаган"}</i>    
+    `;
 
-
-
-
-
-
+    await ctx.reply(message, {
+        parse_mode:"HTML",
+        reply_markup:group_btn,
+    });
+}
 
 pm.filter(async (ctx)=> ctx.config.role_name === "station_noden").command("start", async (ctx)=>{
     if(ctx.config.is_registered){
@@ -367,6 +458,7 @@ pm.filter(async (ctx)=> ctx.config.role_name === "station_noden").command("start
 // Station ds start
 pm.command("start", async (ctx) => {
 
+    console.log(ctx.config)
 
     if(ctx.config.is_registered){
         await ctx.conversation.enter("main_menu_conversation");
@@ -402,7 +494,6 @@ pm.hears("📤 Чиқиш", async (ctx)=>{
     })
 
 })
-
 
 
 async function message_sender_station_data(ctx, msg) {
@@ -452,9 +543,7 @@ let text_1 = `
 
 
 pm.hears("📦 Маҳаллий юклар", async (ctx)=>{
-
     await ctx.conversation.enter("local_station_conversation");
-
 })
 
 
@@ -509,7 +598,6 @@ pm.hears("🔼 Кетаётган вагонлар", async (ctx)=>{
     })
 
 })
-
 
 
 const current_station_btn = new Menu("current_station_btn")
@@ -567,13 +655,9 @@ pm.hears("⏹ Турган вагонлар", async (ctx)=>{
 })
 
 
-
-
 pm.hears("🕐 Турган вагонлар муддати", async (ctx)=>{
     await ctx.conversation.enter("duration_time_conversation");
 })
-
-
 
 pm.hears("🗞 Амал бўйича", async (ctx)=>{
 
@@ -597,7 +681,6 @@ pm.hears("🗞 Амал бўйича", async (ctx)=>{
     })
 
 })
-
 
 
 const station_btn = new Menu("station_btn")
@@ -845,23 +928,149 @@ pm.hears("📉 Ҳисобот", async (ctx)=>{
     }
 
 })
+pm.hears("🗞 Вагон буюртмалар", async (ctx)=>{
+    await ctx.reply("Илтимос кутинг")
+    let res_data = await wagon_order_report();
+
+
+
+    if(res_data.status){
+        const workbook = new ExcelJS.Workbook();
+        const worksheet  = workbook.addWorksheet("Вагон буюртма");
+        worksheet .addRow(['Стансия номи', 'Вагон тури', 'Вагон сони', "Қўшимча изоҳ", "Вақт"]);
+
+        const rowNumber = 1;
+
+        // Fill color you want to set
+        const fillColor = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '85b2f9' } // Red background color
+        };
+        worksheet.getRow(rowNumber).eachCell({ includeEmpty: true }, cell => {
+            cell.fill = fillColor;
+        });
+
+        let report_list = res_data.data;
+        for(let i=0; i<report_list.length; i++){
+            let report = report_list[i];
+            let station_name = report.station_id?.station_name_ru;
+            let order_comment = report.order_comment;
+            let order_date = new Date(report.created_at).toLocaleString("uz-UZ");
+
+            for(let j=0; j<report.order_list.length; j++){
+                let wagon_order = report.order_list[j]
+                worksheet .addRow([station_name, wagon_order.name, wagon_order.count,order_comment, order_date ]);
+            }
+
+        }
+
+        const filePath = './download/ВагонБуюртма.xlsx';
+        workbook.xlsx.writeFile(filePath)
+            .then(()=> {
+                console.log('Excel file created successfully.');
+                let file_path =  new InputFile(filePath)
+                ctx.replyWithDocument(file_path)
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+            });
+        await ctx.reply("✅ Yakunlandi");
+
+    }else{
+        await ctx.reply("⚠️ Сервер хатоси")
+    }
+
+
+})
+
+
+
+
+
+
 
 
 pm.hears("📃 Вагон буюртма", async (ctx)=>{
+   let check_time =  check_order_time();
+   if(check_time.status){
+       await ctx.conversation.enter("wagon_type_conversation");
+   }else{
+       await ctx.reply(`
+<b>⚠️ Рухсат этилмади!</b>
+
+<i>Вагон учун  буюртмалар соат <b>6:00 дан 9:00 гача </b> ва <b>17:00 дан 21:00 гача</b>  вақт оралиқларда қабул қилинади.</i>  
+
+🕟 <i>Вақт <b>${check_time.time}</b></i>
+     
+       `, {
+           parse_mode:"HTML"
+       })
+   }
+
+
+
+})
+pm.hears("➕ Вагон қўшиш", async (ctx)=>{
     await ctx.conversation.enter("wagon_type_conversation");
 
 })
+pm.hears("☑️ Буюртмани якунлаш", async (ctx)=>{
+    await ctx.conversation.enter("confirm_order_conversation");
 
-pm.hears("Wagon type 1", async (ctx)=>{
-    await ctx.conversation.enter("wagon_order_conversation");
+})
+pm.hears("➡️ Ўтказиб юбориш", async (ctx)=>{
+    await ctx.conversation.enter("review_order_conversation");
 
 })
 
+pm.hears("❌ Буюртмани бекор қилиш", async (ctx)=>{
+    ctx.session.session_db.selected_wagon_list = [];
+    ctx.session.session_db.selected_wagon_comment=null;
+    await ctx.reply("Вагон буюртма бекор қилинди! ❌")
+    await ctx.conversation.enter("main_menu_conversation");
+
+})
+
+pm.hears("✅ Буюртмани тасдиқлаш", async (ctx)=>{
+
+    let check_time = check_order_time();
+    if(check_time.status){
+        let order_list = ctx.session.session_db.selected_wagon_list;
+        let comment = ctx.session.session_db.selected_wagon_comment;
+        let data = {
+            user_id:ctx.from.id,
+            order_list:order_list,
+            order_comment:comment,
+            order_type:0,
+            station_id:ctx.config.station_id,
+            station_parent_id:ctx.config.station_parent_id,
+        }
+        let res_data = await register_order(data);
+        if(res_data.status){
+            await ctx.reply("✅ Буюртма мувофақиятли тасдиқланди");
+
+        }else{
+            await ctx.reply("⚠️ Сервер хатоси");
+        }
+        await ctx.conversation.enter("main_menu_conversation");
+    }else{
+
+        await ctx.reply(`
+<b>⚠️ Рухсат этилмади!</b>
+
+<i>Вагон учун  буюртмалар соат <b>6:00 дан 9:00 гача </b> ва <b>17:00 дан 21:00 гача</b>  вақт оралиқларда қабул қилинади.</i>   
+
+🕟 <i>Вақт <b>${check_time.time}</b></i>    
+       `, {
+            parse_mode:"HTML"
+        })
+        await ctx.conversation.enter("main_menu_conversation");
+    }
 
 
 
-
-
+})
 
 
 
@@ -875,6 +1084,7 @@ pm.hears("Wagon type 1", async (ctx)=>{
 pm.hears("🔙 Асосий меню", async (ctx)=>{
     await ctx.conversation.enter("main_menu_conversation");
 })
+
 
 pm.hears("🔙 Орқага", async (ctx)=>{
     await ctx.conversation.enter("local_station_conversation");
@@ -910,9 +1120,9 @@ pm.hears("👤 Маълумотларим", async (ctx)=>{
 
 <b>ҲИСОБОТ</b>
 
-<i>♻️ Тури: <b>${report?.type}</b></i>
-<i>📈 Номи: <b>${report?.title}</b></i>
-<i>🔄 Охирги янгиланиш: <b>${report?.date}</b></i>
+<i>♻️ Тури: <b>"${report?.type}"</b></i>
+<i>📈 Номи: <b>"${report?.title}"</b></i>
+<i>🔄 Охирги янгиланиш: <b>${report?.date.split('на')[1]}</b></i>
 
 
     `,{
@@ -1031,7 +1241,14 @@ bot.filter(async (ctx)=> ctx.message?.text?.toString()?.includes('📄')).on("ms
     }
 });
 
-
+bot.filter(async (ctx)=> ctx.message?.text?.toString()?.includes('🚞')).on('msg', async (ctx)=>{
+    let split_text = ctx.msg.text.split('🚞')[0];
+    let selected_wagon = wagon_type_list.filter((item)=> item.name === split_text.trim());
+    if(selected_wagon.length===1){
+        ctx.session.session_db.selected_type_wagon =selected_wagon[0];
+        await ctx.conversation.enter("wagon_order_conversation");
+    }
+})
 
 
 

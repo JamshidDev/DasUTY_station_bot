@@ -307,7 +307,7 @@ bot.command("add_admin", async (ctx)=>{
 //         let element = station_list[i];
 //         let station = await register_unit_station(element.station_name.toString().trim());
 //         if(station.data){
-//             let status  = await  update_station_parent(station.data._id, 3);
+//             let status  = await  update_station_parent(station.data._id, 6);
 //             console.log(status)
 //         }
 //
