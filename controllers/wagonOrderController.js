@@ -25,10 +25,11 @@ const register_order = async (data)=>{
 }
 
 const wagon_order_report = async (role_id)=>{
+    console.log(role_id)
     try {
         let current_date = new Date();
         let current_hour = current_date.getHours();
-        let order_type = 1;
+        let order_type = 0;
          if(current_hour>=17 && current_hour<6){
              order_type =0;
         }
