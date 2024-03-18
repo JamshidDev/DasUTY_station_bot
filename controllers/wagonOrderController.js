@@ -26,7 +26,6 @@ const register_order = async (data)=>{
 
 const wagon_order_report = async (role_id)=>{
     try {
-
         let current_date = new Date();
         let current_hour = current_date.getHours();
         let order_type = 1;
@@ -42,10 +41,10 @@ const wagon_order_report = async (role_id)=>{
         let result = await WagonOrder.find({
             station_parent_id:role_id,
             order_type:order_type,
-            created_at:{
-                $gte: startOfDay,
-                $lte: endOfDay,
-            }
+            // created_at:{
+            //     $gte: startOfDay,
+            //     $lte: endOfDay,
+            // }
         }).populate("station_id")
         return {
             status:true,
