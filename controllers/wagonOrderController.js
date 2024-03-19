@@ -42,10 +42,10 @@ const wagon_order_report = async (role_id)=>{
         let result = await WagonOrder.find({
             station_parent_id:role_id,
             order_type:order_type,
-            // created_at:{
-            //     $gte: startOfDay,
-            //     $lte: endOfDay,
-            // }
+            created_at:{
+                $gte: startOfDay,
+                $lte: endOfDay,
+            }
         }).populate("station_id")
         return {
             status:true,

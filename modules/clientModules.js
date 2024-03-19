@@ -274,27 +274,27 @@ const check_order_time = ()=>{
     let current_hour = new Date().getHours() + 2;
     let current_minute = new Date().getMinutes();
 
-    // if(current_hour>=6 && current_hour<9){
-    //     return {
-    //         status:true,
-    //         type_id:1,
-    //     }
-    // }else if(current_hour>=17 && current_hour<21){
-    //     return {
-    //         status:true,
-    //         type_id:0,
-    //     }
-    // }else{
-    //     return {
-    //         status:false,
-    //         time:`${current_hour} : ${current_minute}`,
-    //     }
-    // }
-
-    return {
-        status:true,
-        type_id:0,
+    if(current_hour>=6 && current_hour<9){
+        return {
+            status:true,
+            type_id:1,
+        }
+    }else if(current_hour>=17 && current_hour<21){
+        return {
+            status:true,
+            type_id:0,
+        }
+    }else{
+        return {
+            status:false,
+            time:`${current_hour} : ${current_minute}`,
+        }
     }
+
+    // return {
+    //     status:true,
+    //     type_id:0,
+    // }
 }
 
 async function wagon_type_conversation(conversation, ctx) {
