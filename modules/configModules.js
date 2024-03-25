@@ -69,7 +69,7 @@ bot.use(async (ctx, next) => {
 
     const super_admin_list = [1038293334,5175158552];
 
-    const command_list = ["🔴 Бекор қилиш", "Bekor qilish"]
+    const command_list = ["🔴 Бекор қилиш", "Bekor qilish", '/start']
     if (command_list.includes(ctx.message?.text)) {
         const stats = await ctx.conversation.active();
         for (let key of Object.keys(stats)) {
