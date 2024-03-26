@@ -60,72 +60,71 @@ async function upload_local_database(conversation, ctx) {
     let workbook_response = xlsx_reader.utils.sheet_to_json(
         workbook.Sheets[workbook_sheet[0]]
     );
+    // console.log(workbook_response)
 
     await delete_all_old_reports();
     await delete_report()
     await ctx.reply("✅ Eski baza o'chirildi 🗑")
 
-    let report ={
-        title:null,
-        date:null,
-        type:null,
+    let report = {
+        title: null,
+        date: null,
+        type: null,
     }
-
-
-    for(let i=0; i<workbook_response.length; i++){
+    for (let i = 0; i < workbook_response.length; i++) {
         let station = workbook_response[i];
+        let keys = Object.keys(workbook_response[i]);
 
-        if(i===0){
-            report.title = station.report_number.toString().trim();
-        }else if(i===1){
-            report.date = station.report_number.toString().trim();
-        }else if(i===2){
-            report.type = station.report_number.toString().trim();
-        }else{
+        if (i === 0) {
+            report.title = keys[0];
+            report.date = station[`${keys[0]}`];
+        } else if (i === 1) {
+            report.type = station[`${keys[0]}`];
 
+        }else if (i === 2) {
+        }
+        else {
+            let first_station_data = await register_unit_station(station[`${keys[7]}`].toString().trim());
+            let last_station_data = await register_unit_station(station[`${keys[11]}`].toString().trim());
+            let current_station_data = await register_unit_station(station[`${keys[3]}`].toString().trim());
 
-
-            let first_station_data = await register_unit_station(station.first_station.toString().trim());
-            let last_station_data = await register_unit_station(station.last_station.trim());
-            let current_station_data = await register_unit_station(station.current_station.trim());
-
-            let action_name_data = await register_unit_action(station.action_name.toString().trim())
-            const serialNumber = station.action_date;
+            let action_name_data = await register_unit_action(station[`${keys[4]}`].toString().trim())
+            const serialNumber = station[`${keys[6]}`].toString().trim();
 
             const excelBaseDate = new Date('1899-12-30'); // Excel's base date is December 30, 1899
             const dateValue = new Date(excelBaseDate.getTime() + serialNumber * 24 * 60 * 60 * 1000);
             let format_date = dateValue.toISOString();
 
-            let index_date_excel = new Date(excelBaseDate.getTime() + station.index_date * 24 * 60 * 60 * 1000);
-            let format_index_date = index_date_excel.toISOString();
+            // let index_date_excel = new Date(excelBaseDate.getTime() + station.index_date * 24 * 60 * 60 * 1000);
+            // let format_index_date = index_date_excel.toISOString();
+            let format_index_date = null;
 
             let format_last_date = null;
-            if(station.last_date){
-                let last_date_excel = new Date(excelBaseDate.getTime() + station.last_date * 24 * 60 * 60 * 1000);
-                format_last_date = last_date_excel?.toISOString();
-            }else{
-                format_last_date = null;
-            }
-
+            // if(station.last_date){
+            //     let last_date_excel = new Date(excelBaseDate.getTime() + station.last_date * 24 * 60 * 60 * 1000);
+            //     format_last_date = last_date_excel?.toISOString();
+            // }else{
+            //     format_last_date = null;
+            // }
 
 
             let report_data = {
-                vagon_number:station.wagon_number.toString().trim(),
-                index:station.train_index.toString().trim(),
-                current_station:current_station_data.data?._id,
+                vagon_number:station[`${keys[1]}`],
+                wagon_owner:station[`${keys[2]}`].toString().trim(),
+                action_name_id:action_name_data.data._id,
+                action_name:station[`${keys[4]}`].toString().trim(),
+                index:station[`${keys[5]}`].toString().trim(),
                 first_station:first_station_data.data?._id,
+                current_station:current_station_data.data?._id,
                 last_station:last_station_data.data?._id,
                 action_date:format_date,
-                action_name_id:action_name_data.data._id,
-                action_name:station.action_name.toString().trim(),
-                cargo_name:station.cargo_name.toString().trim(),
-                cargo_massa:station.cargo_massa.toString().trim(),
-                wait_time:station.wait_time.toString().trim(),
-                wagon_owner:station.wagon_owner,
-                train_number:station.train_number,
-                index_date:format_index_date,
-                first_country:station.first_country,
-                last_country:station.last_country,
+                cargo_name:station[`${keys[9]}`].toString().trim(),
+                cargo_massa:station[`${keys[10]}`].toString().trim(),
+                wait_time:station[`${keys[12]}`].toString().trim(),
+                train_number:"0000",
+                index_date:format_date,
+                first_country:"Ma'lumot yo'q",
+                last_country:"Ma'lumot yo'q",
                 last_date:format_last_date,
             }
 
@@ -135,31 +134,11 @@ async function upload_local_database(conversation, ctx) {
 
 
         }
-
-
-
     }
-
     await create_report(report);
-    await ctx.reply("✅ Yuklash jarayoni yakunlandi")
-
+    await ctx.reply("✅ Yuklash jarayoni yakunlandi");
     await base_menu(conversation, ctx)
 
-
-
-
-
-}
-
-
-
-const replaceText = async(text)=>{
-    let list = [
-        {
-            from:'2',
-            to:'II'
-        }
-    ]
 
 }
 
