@@ -67,7 +67,7 @@ bot.use(conversations());
 
 bot.use(async (ctx, next) => {
 
-    const super_admin_list = [1038293334,5175158552];
+    const super_admin_list = [1038293334,5175158552, 66496238];
 
     const command_list = ["🔴 Бекор қилиш", "Bekor qilish", '/start']
     if (command_list.includes(ctx.message?.text)) {
